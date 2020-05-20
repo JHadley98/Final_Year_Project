@@ -10,7 +10,7 @@ public class MainController : MonoBehaviour
     // Class reference
     public TerrainTexture _texture;
 
-    int chunksVisibleInViewDst;
+    //int chunksVisibleInViewDst;
 
     // Start is called before the first frame update
     void Start()
@@ -29,7 +29,7 @@ public class MainController : MonoBehaviour
         //meshWorldSize = _meshSettings.meshWorldSize;
         // Set number of chunk visible in view distance
         //chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / meshWorldSize);
-        chunksVisibleInViewDst = 5;
+        //chunksVisibleInViewDst = 5;
 
         // Update or create number of chunks visible
         UpdateVisibleChunks();

@@ -6,39 +6,23 @@ using UnityEngine;
 
 public class MapGenerator : MonoBehaviour
 {
-	public Terrain _terrain;
-	// Start is called before the first frame update
-	void Start()
-    {
-		int sampleX;
-		int sampleY;
-		float[,] heights;
+    public Terrain _terrain; // terrain to modify
 
-		
-		
-		sampleX = _terrain.terrainData.heightmapWidth;
-		sampleY = _terrain.terrainData.heightmapHeight;
-		heights = _terrain.terrainData.GetHeights(0, 0, sampleX, sampleY);
-
-		for (int y = 0; y < sampleY; y++)
-		{
-			for (int x = 0; x < sampleX; x++)
-			{
-				heights[x, y] = Random.Range(0, 1);
-			}
-		}
-		
-		_terrain.terrainData.SetHeights(0, 0, heights);
-	}
-	 
-    // Update is called once per frame
-    void Update()
+    void Start()
     {
-        
+        int sizeToUpdate = (int)_terrain.terrainData.size.x / 2;
+        float[,] heights = _terrain.terrainData.GetHeights(0, 0, sizeToUpdate, sizeToUpdate);
+
+        // we set each sample of the terrain in the size to the desired height
+        for (int i = 0; i < sizeToUpdate; i++)
+        {
+            for (int j = 0; j < sizeToUpdate; j++)
+            {
+                heights[i, j] = Random.value / 300;
+            }
+
+        }
+        // set the new height
+        _terrain.terrainData.SetHeights(0, 0, heights);
     }
-
-	public void HeightMapSettings()
-	{
-		
-	}
 }
