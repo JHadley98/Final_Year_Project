@@ -214,6 +214,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _terrain: {fileID: 662369449}
+  _noiseValues:
+    _normaliseMode: 0
+    scale: 50
+    octaves: 6
+    persistance: 0.5
+    lacunarity: 2
+    seed: 0
+    offset: {x: 0, y: 0}
+  getHeight: 0
+  amplitude: 1
+  frequency: 1
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
