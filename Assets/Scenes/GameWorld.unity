@@ -132,6 +132,7 @@ GameObject:
   - component: {fileID: 662369449}
   - component: {fileID: 662369448}
   - component: {fileID: 662369451}
+  - component: {fileID: 662369452}
   m_Layer: 0
   m_Name: Terrain
   m_TagString: Untagged
@@ -216,15 +217,44 @@ MonoBehaviour:
   _terrain: {fileID: 662369449}
   _noiseValues:
     _normaliseMode: 0
-    scale: 50
+    scale: 100
     octaves: 6
-    persistance: 0.5
-    lacunarity: 2
+    persistance: 0.6
+    lacunarity: 1.5
     seed: 0
     offset: {x: 0, y: 0}
-  getHeight: 0
-  amplitude: 1
-  frequency: 1
+  _texturingTerrain: {fileID: 662369452}
+--- !u!114 &662369452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 662369447}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2ee16ebcdd280c47b42e0f2b83f14e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  splatMap:
+  - textureIndex: 0
+    startingHeight: -10
+    overlap: 1
+  - textureIndex: 1
+    startingHeight: 0
+    overlap: 1
+  - textureIndex: 2
+    startingHeight: 5
+    overlap: 1
+  - textureIndex: 3
+    startingHeight: 20
+    overlap: 1
+  - textureIndex: 3
+    startingHeight: 25
+    overlap: 1
+  - textureIndex: 3
+    startingHeight: 30
+    overlap: 1
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -335,15 +365,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 408730, guid: 7737647c22c1fc64a88d5cd030c352ce, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 10
+      value: 20.06
       objectReference: {fileID: 0}
     - target: {fileID: 408730, guid: 7737647c22c1fc64a88d5cd030c352ce, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 10
+      value: 30.365
       objectReference: {fileID: 0}
     - target: {fileID: 408730, guid: 7737647c22c1fc64a88d5cd030c352ce, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 10
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 408730, guid: 7737647c22c1fc64a88d5cd030c352ce, type: 3}
       propertyPath: m_LocalRotation.x

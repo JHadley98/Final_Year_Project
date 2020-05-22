@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 // Height map and noise class
 
@@ -8,17 +6,22 @@ public class MapGenerator : MonoBehaviour
 {
     public Terrain _terrain; // terrain to modify
     public NoiseValues _noiseValues;
+    public TexturingTerrain _texturingTerrain;
 
     public enum NormaliseMode { Local, Global };
-    public float getHeight = 0;
-    public float amplitude = 1;
-    public float frequency = 1;
+
+    private float amplitude = 1;
+    private float frequency = 1;
+
+
+    public float GetHeight { get; set; } = 0;
 
     void Start()
     {
         // Set heights for initial terrain
         SetMap(_terrain, _noiseValues);
-
+        TerrainData _terrainData = _terrain.terrainData;
+        _texturingTerrain.SplatMap(_terrainData);
     }
 
     private void Update()
@@ -61,7 +64,7 @@ public class MapGenerator : MonoBehaviour
             float sampleY = randomSeed.Next(-100000, 100000) + _noiseValues.offset.y + sampleCentre.y;
             setOctaves[i] = new Vector2(sampleX, sampleY);
 
-            getHeight += amplitude;
+            GetHeight += amplitude;
             amplitude *= _noiseValues.persistance;
         }
 
@@ -118,7 +121,7 @@ public class MapGenerator : MonoBehaviour
                         // Set Global Normalisation
                         float normalisedHeight = (map[x, y] + 1) / (perlinNoiseHeight / 0.9f);
                         // Clamp map to normlisedHeight on x axis, y to 0 and z axis to the max value
-                        map[x, y] = Mathf.Clamp(normalisedHeight, 0, int.MaxValue);
+                        map[x, y] = Mathf.Clamp(normalisedHeight, 0, maxNoiseHeight) / 25;
                     }
                 }
             }
@@ -134,7 +137,7 @@ public class MapGenerator : MonoBehaviour
                 {
                     // If normaliseMode equals normal then the entire map can be generated at one knowing the min and max noiseheight values
 
-                    map[x, y] = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, map[x, y]) / 30;
+                    map[x, y] = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, map[x, y]) / 20;
                 }
             }
         }

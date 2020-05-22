@@ -1,14 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class MainController : MonoBehaviour
 {
     private Terrain _terrain;
     public Material _terrainMaterial;
 
-    // Class reference
-    public TerrainTexture _texture;
+    //// Class reference
+    //public TerrainTexture _texture;
 
     //int chunksVisibleInViewDst;
 
@@ -18,8 +16,10 @@ public class MainController : MonoBehaviour
         _terrain = GetComponent<Terrain>();
 
         // At the start of the game apply the material to the terrain material asset and update mesh heights for the terrain.
+
         // TODO: Create min and max height replacing 0, 100
-        _texture.CreateTextureOptions(_terrainMaterial, 0, 100);
+
+        //_texture.CreateTextureOptions(_terrainMaterial, 0, 100);
 
 
         //TODO meed calculation here
@@ -38,7 +38,7 @@ public class MainController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     private void UpdateVisibleChunks()
