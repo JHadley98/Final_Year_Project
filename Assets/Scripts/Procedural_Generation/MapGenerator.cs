@@ -13,6 +13,7 @@ public class MapGenerator : MonoBehaviour
     private float amplitude = 1;
     private float frequency = 1;
 
+   // private Camera _camera;
 
     public float GetHeight { get; set; } = 0;
 
@@ -22,6 +23,7 @@ public class MapGenerator : MonoBehaviour
         SetMap(_terrain, _noiseValues);
         TerrainData _terrainData = _terrain.terrainData;
         _texturingTerrain.SplatMap(_terrainData);
+       // _camera = Camera.current;
     }
 
     private void Update()
@@ -29,6 +31,7 @@ public class MapGenerator : MonoBehaviour
         //Check it new terrains are needed
         //See what is visible
         //If need new one then add terrain and call setmap to create heights
+        //Vector2 viewerPosition = new Vector2(_camera.transform.position.x, _camera.transform.position.z);
     }
 
 
