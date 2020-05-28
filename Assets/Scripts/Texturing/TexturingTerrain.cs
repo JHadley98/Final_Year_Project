@@ -42,8 +42,13 @@ public class TexturingTerrain : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    public void SplatMap(TerrainData _terrainData)
+
+    public void SplatMap(Terrain _terrain)
     {
+        TerrainData _terrainData = _terrain.terrainData;
+
+        
+        
         // 3D float array for the alpha width and height and the number of layers add to the terrain
         float[,,] splatmapData = new float[_terrainData.alphamapWidth, _terrainData.alphamapHeight, _terrainData.alphamapLayers];
 
@@ -58,7 +63,7 @@ public class TexturingTerrain : MonoBehaviour
                 float[] splatMap = new float[this.splatMap.Length];
 
                 // Clamp noise
-                float thisNoise = Map(Mathf.PerlinNoise(x * 0.03f, y * 0.03f), 0, 1, 0.5f, 1);
+                float thisNoise = Map(Mathf.PerlinNoise(x * 0.05f, y * 0.05f), 0, 1, 0.5f, 1);
                 // thisNoise = 1.0f;
                 // Loop through all the height values
                 for (int i = 0; i < this.splatMap.Length; i++)

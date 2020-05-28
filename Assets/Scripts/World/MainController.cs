@@ -8,46 +8,58 @@ public class MainController : MonoBehaviour
 
     private Camera _camera;
 
+    public MapGenerator _mapGenerator;
+
     public float minCameraHeight;
     public float startCameraHeight;
+    private Terrain prevTerrain;
 
     // Start is called before the first frame update
     void Start()
     {
         _camera = Camera.main;
         _terrain = GetTerrain(_camera.transform.position);
+        prevTerrain = _terrain;
+       
     }
 
     // Update is called once per frame
     void Update()
-    {
+    { 
+       // _mapGenerator = gameObject.GetComponent<MapGenerator>();
+        
+        _terrain = GetTerrain(_camera.transform.position);
+
+        //Check if terrain has changed from previous one
+        if (_terrain != prevTerrain)
+        {
+            _mapGenerator.CreateEndlessTerrain(_terrain.GetComponent<Terrain>());
+        }
         // positions in getheight are not reversed as looking at camera but need to be scaled as x and z positions are on a different scale to the height map
-        float terrheight = _terrain.terrainData.GetHeight((int)_camera.transform.position.x * _terrain.terrainData.heightmapWidth / (int)_terrain.terrainData.size.x, 
-                                                          (int)_camera.transform.position.z * _terrain.terrainData.heightmapHeight / (int)_terrain.terrainData.size.z);
+        float terrheight = _terrain.terrainData.GetHeight((int)(_camera.transform.position.x - _terrain.GetPosition().x) * _terrain.terrainData.heightmapWidth / (int)_terrain.terrainData.size.x,
+                                                          (int)(_camera.transform.position.z - _terrain.GetPosition().z) * _terrain.terrainData.heightmapHeight / (int)_terrain.terrainData.size.z);
 
         // Check camera height
         if (_camera.transform.position.y < terrheight + minCameraHeight)
         {
-
             //Move up
-            changeCameraHeight();
+            ChangeCameraHeight();
         }
         else if (_camera.transform.localPosition.y > startCameraHeight)
         {
             // Move down
-            changeCameraHeight();
+            ChangeCameraHeight();
         }
-
     }
 
-    public void changeCameraHeight()
+    public void ChangeCameraHeight()
     {
         // positions in getheight are not reversed as looking at camera but need to be scaled as x and z positions are on a different scale to the height map
-        float terrheight = _terrain.terrainData.GetHeight((int)_camera.transform.position.x * _terrain.terrainData.heightmapWidth / (int)_terrain.terrainData.size.x, 
-                                                          (int)_camera.transform.position.z * _terrain.terrainData.heightmapHeight / (int)_terrain.terrainData.size.z);
+        float terrheight = _terrain.terrainData.GetHeight((int)(_camera.transform.position.x - _terrain.GetPosition().x) * _terrain.terrainData.heightmapWidth / (int)_terrain.terrainData.size.x,
+                                                          (int)(_camera.transform.position.z - _terrain.GetPosition().z) * _terrain.terrainData.heightmapHeight / (int)_terrain.terrainData.size.z);
         //Move camera's relative position
         float cameraNewY = terrheight + minCameraHeight - _player.transform.position.y;
-      
+
         // If camera position is lower than player then keep camera position in line with player
         if (cameraNewY < startCameraHeight)
         {
@@ -55,11 +67,11 @@ public class MainController : MonoBehaviour
         }
 
         // Cap the amount of change per frame to 0.01 this stops dramatic changes to the camera angle
-        if(cameraNewY > _camera.transform.localPosition.y + 0.01f)
+        if (cameraNewY > _camera.transform.localPosition.y + 0.01f)
         {
             cameraNewY = _camera.transform.localPosition.y + 0.01f;
         }
-        else if(cameraNewY < _camera.transform.localPosition.y - 0.01f)
+        else if (cameraNewY < _camera.transform.localPosition.y - 0.01f)
         {
             cameraNewY = _camera.transform.localPosition.y - 0.01f;
         }
