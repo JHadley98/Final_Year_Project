@@ -223,6 +223,8 @@ MonoBehaviour:
     lacunarity: 2
     offset: {x: 0, y: 0}
   _texturingTerrain: {fileID: 662369452}
+  _mainController: {fileID: 1943224981}
+  numOfTerrains: 10
 --- !u!114 &662369452
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -422,6 +424,11 @@ PrefabInstance:
       propertyPath: m_MoveSpeedMultiplier
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 13615390, guid: 7737647c22c1fc64a88d5cd030c352ce, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 13400000, guid: c2815a7ab32e42c4bb42f59caacb8ec1,
+        type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7737647c22c1fc64a88d5cd030c352ce, type: 3}
 --- !u!1 &963194225
@@ -529,3 +536,4 @@ MonoBehaviour:
   _mapGenerator: {fileID: 662369451}
   minCameraHeight: 0.78
   startCameraHeight: 0.78
+  terrainsNeeded: 0

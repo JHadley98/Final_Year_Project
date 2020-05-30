@@ -1,36 +1,84 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 // Height map and noise class
 
 public class MapGenerator : MonoBehaviour
 {
-    
-    public Terrain _terrain; // terrain to modify
+    // Terrain to modify
+    public Terrain _terrain;
+  
+    // Class referemces
     public NoiseValues _noiseValues;
     public TexturingTerrain _texturingTerrain;
-
+    public MainController _mainController;
+    
+    // Normalise noise values setting either local or global noise scale
     public enum NormaliseMode { Local, Global };
 
-    private float amplitude = 1;
-    private float frequency = 1;
-    public float GetHeight { get; set; } = 0;
+    // Float arrays for heightmap and splat data
+    private float[,] heightmapData;
+    private float[,,] splatData;
+    
+    // Default terrain data, used to store the values for the initial terrain
     private TerrainData defaultTD;
-    private GameObject secondTerrain;
-    private Terrain _terrain2;
-    private Vector3 chkTerrainPos;
+    // Create next terrain chunk
+    private GameObject nextTerrainChunk;
+    // Create next terrain
+    private Terrain _nextTerrain;
+
+    // Terrains array
+    private Terrain[] _terrains;
+    
+    // Check all positions of the terrains in the terrains array
+    private Vector3 checkTerrainPosition;
+    // Get current terrain position
+    private Vector3 currentTerrainPosition;
+    // Used to set the surronding terrain position in endless terrain
+    private Vector3[] surroundingTerrain;
+    // Calculate center of terrain
+    private Vector2 terrainCentre;
+
+    // Set number of terrains, used to change how many possible heightmap and splatmaps are used
+    public int numOfTerrains;
+    // Terrain number that is created
+    private int terrainNumber = 0;
+    // Create float 2D array list of terrain heights
+    private List<float[,]> terrainHeights = new List<float[,]>();
+    // Create 3D float array for terrainS splatmap
+    private List<float[,,]> terrainSplatmap = new List<float[,,]>();
+
+    // Check if terrain is found when checking around the current terrain the player is on
+    private bool terrainFound;
+
     void Start()
     {
-        // Set heights for initial terrain
-        SetMap(_terrain, _noiseValues, (int)(Random.value * 100));
-        // Apply SplatMap to terrain (textures)
-        _texturingTerrain.SplatMap(_terrain);
+        // Calculate center of terrain
+        terrainCentre = new Vector2(_terrain.terrainData.size.x / 2, _terrain.terrainData.size.z / 2);
+
+        for (int i = 0; i < numOfTerrains; i++)
+        {
+            // Set heightmapData to eqaul the perlin noise function, passing in the terrain width, height, noise values applied to map, and random value times 100 to create random terrain seeds
+            heightmapData = SetPerlinNoise(_terrain.terrainData.heightmapWidth, _terrain.terrainData.heightmapHeight, _noiseValues, terrainCentre, (int)(Random.value * 100));
+            // Set heights for initial terrain
+            _terrain.terrainData.SetHeights(0, 0, heightmapData);
+            // Apply SplatMap to terrain (textures)
+            _texturingTerrain.SplatMap(_terrain);
+
+            terrainHeights.Add(heightmapData);
+            terrainSplatmap.Add(_terrain.terrainData.GetAlphamaps(0, 0, _terrain.terrainData.alphamapWidth, _terrain.terrainData.alphamapHeight));
+        }
 
         // Creates default terrain data to equal current terrain data
         defaultTD = _terrain.terrainData;
 
-        // At start of the game run, to create endless terrain
-        CreateEndlessTerrain(_terrain);
-       
+        // Loop through CreateEndlessTerrain 8 times to create initial 3x3 terrain
+        // CreateEndlessTerrain is called in MainController to create new terrain, this will however, loop through ensuring the player
+        // is always in a 3x3 terrain
+        for (int i = 0; i < 8; i++)
+        {
+            CreateEndlessTerrain(_terrain);
+        }
     }
 
     private void Update()
@@ -38,14 +86,14 @@ public class MapGenerator : MonoBehaviour
         //Check if new terrains are needed
         //See what is visible
         //If need new one then add terrain and call setmap to create heights
-
     }
 
-    public void CreateEndlessTerrain(Terrain _currTerrain)
+    public void CreateEndlessTerrain(Terrain _currentTerrain)
     {
-
-        Vector3 curTerrainPos = _currTerrain.GetPosition();
-        Vector3[] surroundingTerrain = new Vector3[8];
+        currentTerrainPosition = _currentTerrain.GetPosition();
+        // Create 8 surrounding terrains in a vector3 terrain
+        surroundingTerrain = new Vector3[8];
+        // Set 8 default positions around original terrain located at 0, 0, 0
         surroundingTerrain[0] = new Vector3(-defaultTD.size.x, 0, defaultTD.size.z);
         surroundingTerrain[1] = new Vector3(0, 0, defaultTD.size.z);
         surroundingTerrain[2] = new Vector3(defaultTD.size.x, 0, defaultTD.size.z);
@@ -55,202 +103,61 @@ public class MapGenerator : MonoBehaviour
         surroundingTerrain[6] = new Vector3(-defaultTD.size.x, 0, -defaultTD.size.z);
         surroundingTerrain[7] = new Vector3(-defaultTD.size.x, 0, 0);
 
-        //Get all terrains into an array to check
-        Terrain[] _terrains = Terrain.activeTerrains;
-
-        
-        int found = 0;
-
-
-        for (int x = 0; x < 8; x++)
+        heightmapData = terrainHeights[terrainNumber];
+        splatData = terrainSplatmap[terrainNumber];
+        if (terrainNumber == numOfTerrains - 1)
         {
+            terrainNumber = 0;
+        }
+        else
+        {
+            terrainNumber++;
+        }
 
-            found = 0;
+        //Get all terrains into an array to check
+        _terrains = Terrain.activeTerrains;
+
+        bool terrainBuilt = false;
+        for (int x = 0; x < 8 && terrainBuilt == false; x++)
+        {
+            terrainFound = false;
             for (int i = 0; i < _terrains.Length; i++)
             {
-                chkTerrainPos = _terrains[i].GetPosition();
-                if (chkTerrainPos == surroundingTerrain[x] + curTerrainPos)
+                checkTerrainPosition = _terrains[i].GetPosition();
+                if (checkTerrainPosition == surroundingTerrain[x] + currentTerrainPosition)
                 {
-                    found = 1;
+                    terrainFound = true;
                 }
             }
 
-            if (found == 0)
+            if (terrainFound == false)
             {
                 // Create news terrain object
-                secondTerrain = Terrain.CreateTerrainGameObject(new TerrainData());
+                nextTerrainChunk = Terrain.CreateTerrainGameObject(new TerrainData());
                 // Set position for new terrain
-                secondTerrain.transform.position = surroundingTerrain[x] + curTerrainPos;
-
+                nextTerrainChunk.transform.position = surroundingTerrain[x] + currentTerrainPosition;
 
                 // Terrain2 equals new terrain
-                _terrain2 = secondTerrain.GetComponent<Terrain>();
-                
+                _nextTerrain = nextTerrainChunk.GetComponent<Terrain>();
 
                 // Set terrain 2 values equal to default terrain data
-                _terrain2.terrainData.terrainLayers = defaultTD.terrainLayers;
-                _terrain2.terrainData.heightmapResolution = defaultTD.heightmapResolution;
-                _terrain2.terrainData.baseMapResolution = defaultTD.baseMapResolution;
-                _terrain2.terrainData.size = defaultTD.size;
+                _nextTerrain.terrainData.terrainLayers = defaultTD.terrainLayers;
+                _nextTerrain.terrainData.heightmapResolution = defaultTD.heightmapResolution;
+                _nextTerrain.terrainData.baseMapResolution = defaultTD.baseMapResolution;
+                _nextTerrain.terrainData.size = defaultTD.size;
 
                 // Set heights for terrain
-                SetMap(_terrain2, _noiseValues, (int)(Random.value * 100));
+                _nextTerrain.terrainData.SetHeights(0, 0, heightmapData);
                 // Apply SplatMap to terrain (textures)
-                _texturingTerrain.SplatMap(_terrain2);
+                _nextTerrain.terrainData.SetAlphamaps(0, 0, splatData);
+
+                terrainBuilt = true;
             }
-
         }
-
-
-
-            
-
-        /*
-        // Create news terrain object
-        GameObject thirdTerrain = Terrain.CreateTerrainGameObject(new TerrainData());
-
-        // Set position for new terrain
-        thirdTerrain.transform.position = new Vector3(0, 0, 250);
-
-        // Terrain2 equals new terrain
-        Terrain _terrain3 = thirdTerrain.GetComponent<Terrain>();
-
-        // Set terrain 2 values equal to default terrain data
-        _terrain3.terrainData.terrainLayers = defaultTD.terrainLayers;
-        _terrain3.terrainData.heightmapResolution = defaultTD.heightmapResolution;
-        _terrain3.terrainData.baseMapResolution = defaultTD.baseMapResolution;
-        _terrain3.terrainData.size = defaultTD.size;
-
-        // Set heights for terrain
-        SetMap(_terrain3, _noiseValues, (int)(Random.value * 100));
-        // Apply SplatMap to terrain (textures)
-        _texturingTerrain.SplatMap(_terrain3);
-
-        // Create news terrain object
-        GameObject forthTerrain = Terrain.CreateTerrainGameObject(new TerrainData());
-
-        // Set position for new terrain
-        forthTerrain.transform.position = new Vector3(250, 0, 0);
-
-        // Terrain2 equals new terrain
-        Terrain _terrain4 = forthTerrain.GetComponent<Terrain>();
-
-        // Set terrain 2 values equal to default terrain data
-        _terrain4.terrainData.terrainLayers = defaultTD.terrainLayers;
-        _terrain4.terrainData.heightmapResolution = defaultTD.heightmapResolution;
-        _terrain4.terrainData.baseMapResolution = defaultTD.baseMapResolution;
-        _terrain4.terrainData.size = defaultTD.size;
-
-        // Set heights for terrain
-        SetMap(_terrain4, _noiseValues, (int)(Random.value * 100));
-        // Apply SplatMap to terrain (textures)
-        _texturingTerrain.SplatMap(_terrain4);
-
-        // Create news terrain object
-        GameObject fithTerrain = Terrain.CreateTerrainGameObject(new TerrainData());
-
-        // Set position for new terrain
-        fithTerrain.transform.position = new Vector3(-250, 0, 0);
-
-        // Terrain2 equals new terrain
-        Terrain _terrain5 = fithTerrain.GetComponent<Terrain>();
-
-        // Set terrain 2 values equal to default terrain data
-        _terrain5.terrainData.terrainLayers = defaultTD.terrainLayers;
-        _terrain5.terrainData.heightmapResolution = defaultTD.heightmapResolution;
-        _terrain5.terrainData.baseMapResolution = defaultTD.baseMapResolution;
-        _terrain5.terrainData.size = defaultTD.size;
-
-        // Set heights for terrain
-        SetMap(_terrain5, _noiseValues, (int)(Random.value * 100));
-        // Apply SplatMap to terrain (textures)
-        _texturingTerrain.SplatMap(_terrain5);
-
-        // Create news terrain object
-        GameObject sixthTerrain = Terrain.CreateTerrainGameObject(new TerrainData());
-
-        // Set position for new terrain
-        sixthTerrain.transform.position = new Vector3(-250, 0, 250);
-
-        // Terrain2 equals new terrain
-        Terrain _terrain6 = sixthTerrain.GetComponent<Terrain>();
-
-        // Set terrain 2 values equal to default terrain data
-        _terrain6.terrainData.terrainLayers = defaultTD.terrainLayers;
-        _terrain6.terrainData.heightmapResolution = defaultTD.heightmapResolution;
-        _terrain6.terrainData.baseMapResolution = defaultTD.baseMapResolution;
-        _terrain6.terrainData.size = defaultTD.size;
-
-        // Set heights for terrain
-        SetMap(_terrain6, _noiseValues, (int)(Random.value * 100));
-        // Apply SplatMap to terrain (textures)
-        _texturingTerrain.SplatMap(_terrain6);
-
-        // Create news terrain object
-        GameObject seventhTerrain = Terrain.CreateTerrainGameObject(new TerrainData());
-
-        // Set position for new terrain
-        seventhTerrain.transform.position = new Vector3(-250, 0, -250);
-
-        // Terrain2 equals new terrain
-        Terrain _terrain7 = seventhTerrain.GetComponent<Terrain>();
-
-        // Set terrain 2 values equal to default terrain data
-        _terrain7.terrainData.terrainLayers = defaultTD.terrainLayers;
-        _terrain7.terrainData.heightmapResolution = defaultTD.heightmapResolution;
-        _terrain7.terrainData.baseMapResolution = defaultTD.baseMapResolution;
-        _terrain7.terrainData.size = defaultTD.size;
-
-        // Set heights for terrain
-        SetMap(_terrain7, _noiseValues, (int)(Random.value * 100));
-        // Apply SplatMap to terrain (textures)
-        _texturingTerrain.SplatMap(_terrain7);
-
-        // Create news terrain object
-        GameObject eighthTerrain = Terrain.CreateTerrainGameObject(new TerrainData());
-
-        // Set position for new terrain
-        eighthTerrain.transform.position = new Vector3(250, 0, -250);
-
-        // Terrain2 equals new terrain
-        Terrain _terrain8 = eighthTerrain.GetComponent<Terrain>();
-
-        // Set terrain 2 values equal to default terrain data
-        _terrain8.terrainData.terrainLayers = defaultTD.terrainLayers;
-        _terrain8.terrainData.heightmapResolution = defaultTD.heightmapResolution;
-        _terrain8.terrainData.baseMapResolution = defaultTD.baseMapResolution;
-        _terrain8.terrainData.size = defaultTD.size;
-
-        // Set heights for terrain
-        SetMap(_terrain8, _noiseValues, (int)(Random.value * 100));
-        // Apply SplatMap to terrain (textures)
-        _texturingTerrain.SplatMap(_terrain8);
-
-        // Create news terrain object
-        GameObject ninthTerrain = Terrain.CreateTerrainGameObject(new TerrainData());
-
-        // Set position for new terrain
-        ninthTerrain.transform.position = new Vector3(250, 0, 250);
-
-        // Terrain2 equals new terrain
-        Terrain _terrain9 = ninthTerrain.GetComponent<Terrain>();
-
-        // Set terrain 2 values equal to default terrain data
-        _terrain9.terrainData.terrainLayers = defaultTD.terrainLayers;
-        _terrain9.terrainData.heightmapResolution = defaultTD.heightmapResolution;
-        _terrain9.terrainData.baseMapResolution = defaultTD.baseMapResolution;
-        _terrain9.terrainData.size = defaultTD.size;
-
-        // Set heights for terrain
-        SetMap(_terrain9, _noiseValues, (int)(Random.value * 100));
-        // Apply SplatMap to terrain (textures)
-        _texturingTerrain.SplatMap(_terrain9);
-
-        //SetNeighbors(_terrain, _terrain, _terrain, _terrain);
-
-        //StitchToBottom(_terrain, _terrain2);
-        //StitchToLeft(_terrain, _terrain2);
-        */
+        if (terrainBuilt == false)
+        {
+            _mainController.terrainsNeeded = false;
+        }
     }
 
     public void SetNeighbors(Terrain left, Terrain top, Terrain right, Terrain bottom)
@@ -296,19 +203,6 @@ public class MapGenerator : MonoBehaviour
         data.SetHeights(0, 0, edgeValues);
     }
 
-    public void SetMap(Terrain _terrain, NoiseValues _noiseValues, int seed)
-    {
-        int mapWidth = _terrain.terrainData.heightmapWidth;
-        int mapHeigth = _terrain.terrainData.heightmapHeight;
-        Vector2 terrainCentre = new Vector2(_terrain.terrainData.size.x / 2, _terrain.terrainData.size.z / 2);
-
-        //Update height array using Perlin Noise
-        float[,] heights = SetPerlinNoise(mapWidth, mapHeigth, _noiseValues, terrainCentre, seed);
-
-        // set the new height
-        _terrain.terrainData.SetHeights(0, 0, heights);
-    }
-
     public float[,] SetPerlinNoise(int width, int height, NoiseValues _noiseValues, Vector2 sampleCentre, int seed)
     {
         float[,] map = new float[width, height];
@@ -319,6 +213,10 @@ public class MapGenerator : MonoBehaviour
         // Set octaves
         Vector2[] setOctaves = new Vector2[_noiseValues.octaves];
 
+        float maxPossibleHeight = 0;
+        float amplitude = 1;
+        float frequency = 1;
+
         // Loop through octaves
         for (int i = 0; i < _noiseValues.octaves; i++)
         {
@@ -327,7 +225,7 @@ public class MapGenerator : MonoBehaviour
             float sampleY = randomSeed.Next(-100000, 100000) + _noiseValues.offset.y + sampleCentre.y;
             setOctaves[i] = new Vector2(sampleX, sampleY);
 
-            GetHeight += amplitude;
+            maxPossibleHeight += amplitude;
             amplitude *= _noiseValues.persistance;
         }
 

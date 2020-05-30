@@ -14,13 +14,18 @@ public class MainController : MonoBehaviour
     public float startCameraHeight;
     private Terrain prevTerrain;
 
+    public bool terrainsNeeded;
+
+    private float startBuildTime = 0f;
+
     // Start is called before the first frame update
     void Start()
     {
         _camera = Camera.main;
         _terrain = GetTerrain(_camera.transform.position);
         prevTerrain = _terrain;
-       
+        terrainsNeeded = false;
+        
     }
 
     // Update is called once per frame
@@ -33,8 +38,16 @@ public class MainController : MonoBehaviour
         //Check if terrain has changed from previous one
         if (_terrain != prevTerrain)
         {
+            terrainsNeeded = true;
+            
+            
+        }
+        if (terrainsNeeded == true && Time.time - startBuildTime > 2f)
+        {
+            startBuildTime = Time.time;
             _mapGenerator.CreateEndlessTerrain(_terrain.GetComponent<Terrain>());
         }
+
         // positions in getheight are not reversed as looking at camera but need to be scaled as x and z positions are on a different scale to the height map
         float terrheight = _terrain.terrainData.GetHeight((int)(_camera.transform.position.x - _terrain.GetPosition().x) * _terrain.terrainData.heightmapWidth / (int)_terrain.terrainData.size.x,
                                                           (int)(_camera.transform.position.z - _terrain.GetPosition().z) * _terrain.terrainData.heightmapHeight / (int)_terrain.terrainData.size.z);
