@@ -47,8 +47,8 @@ public class TexturingTerrain : MonoBehaviour
     {
         TerrainData _terrainData = _terrain.terrainData;
 
-        
-        
+
+
         // 3D float array for the alpha width and height and the number of layers add to the terrain
         float[,,] splatmapData = new float[_terrainData.alphamapWidth, _terrainData.alphamapHeight, _terrainData.alphamapLayers];
 

@@ -216,7 +216,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _terrain: {fileID: 662369449}
   _noiseValues:
-    _normaliseMode: 0
     scale: 250
     octaves: 6
     persistance: 0.5
@@ -224,7 +223,7 @@ MonoBehaviour:
     offset: {x: 0, y: 0}
   _texturingTerrain: {fileID: 662369452}
   _mainController: {fileID: 1943224981}
-  numOfTerrains: 10
+  numOfTerrains: 4
 --- !u!114 &662369452
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -534,6 +533,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _player: {fileID: 1943224980}
   _mapGenerator: {fileID: 662369451}
-  minCameraHeight: 0.78
-  startCameraHeight: 0.78
+  minCameraHeight: 1
+  startCameraHeight: 1
   terrainsNeeded: 0

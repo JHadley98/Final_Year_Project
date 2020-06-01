@@ -25,22 +25,20 @@ public class MainController : MonoBehaviour
         _terrain = GetTerrain(_camera.transform.position);
         prevTerrain = _terrain;
         terrainsNeeded = false;
-        
+
     }
 
     // Update is called once per frame
     void Update()
-    { 
-       // _mapGenerator = gameObject.GetComponent<MapGenerator>();
-        
+    {
+        // _mapGenerator = gameObject.GetComponent<MapGenerator>();
+
         _terrain = GetTerrain(_camera.transform.position);
 
         //Check if terrain has changed from previous one
         if (_terrain != prevTerrain)
         {
             terrainsNeeded = true;
-            
-            
         }
         if (terrainsNeeded == true && Time.time - startBuildTime > 2f)
         {
@@ -48,7 +46,7 @@ public class MainController : MonoBehaviour
             _mapGenerator.CreateEndlessTerrain(_terrain.GetComponent<Terrain>());
         }
 
-        // positions in getheight are not reversed as looking at camera but need to be scaled as x and z positions are on a different scale to the height map
+        // Positions in getheight are not reversed as looking at camera but need to be scaled as x and z positions are on a different scale to the height map
         float terrheight = _terrain.terrainData.GetHeight((int)(_camera.transform.position.x - _terrain.GetPosition().x) * _terrain.terrainData.heightmapWidth / (int)_terrain.terrainData.size.x,
                                                           (int)(_camera.transform.position.z - _terrain.GetPosition().z) * _terrain.terrainData.heightmapHeight / (int)_terrain.terrainData.size.z);
 
@@ -68,10 +66,10 @@ public class MainController : MonoBehaviour
     public void ChangeCameraHeight()
     {
         // positions in getheight are not reversed as looking at camera but need to be scaled as x and z positions are on a different scale to the height map
-        float terrheight = _terrain.terrainData.GetHeight((int)(_camera.transform.position.x - _terrain.GetPosition().x) * _terrain.terrainData.heightmapWidth / (int)_terrain.terrainData.size.x,
+        float terrainHeight = _terrain.terrainData.GetHeight((int)(_camera.transform.position.x - _terrain.GetPosition().x) * _terrain.terrainData.heightmapWidth / (int)_terrain.terrainData.size.x,
                                                           (int)(_camera.transform.position.z - _terrain.GetPosition().z) * _terrain.terrainData.heightmapHeight / (int)_terrain.terrainData.size.z);
-        //Move camera's relative position
-        float cameraNewY = terrheight + minCameraHeight - _player.transform.position.y;
+        // Move camera's relative position
+        float cameraNewY = terrainHeight + minCameraHeight - _player.transform.position.y;
 
         // If camera position is lower than player then keep camera position in line with player
         if (cameraNewY < startCameraHeight)
@@ -88,15 +86,16 @@ public class MainController : MonoBehaviour
         {
             cameraNewY = _camera.transform.localPosition.y - 0.01f;
         }
+        
         _camera.transform.localPosition = new Vector3(_camera.transform.localPosition.x, cameraNewY, _camera.transform.localPosition.z);
 
         //Move camera's angle
         // Distance on Y axis from camera to player 
-        float diffInY = cameraNewY - startCameraHeight;
+        float differenceInY = cameraNewY - startCameraHeight;
         // ~Distance in X, Z plane from camera to player
-        float distToPlayer = Mathf.Sqrt(_camera.transform.localPosition.x * _camera.transform.localPosition.x + _camera.transform.localPosition.z * _camera.transform.localPosition.z);
+        float distanceToPlayer = Mathf.Sqrt((_camera.transform.localPosition.x * _camera.transform.localPosition.x) + (_camera.transform.localPosition.z * _camera.transform.localPosition.z));
         // Angle calculated using inverse tan and converting from radians to degrees
-        float cameraDownAngle = Mathf.Atan(diffInY / distToPlayer) * (180 / Mathf.PI);
+        float cameraDownAngle = Mathf.Atan(differenceInY / distanceToPlayer) * (180 / Mathf.PI);
         // Apply angle to camera rotation
         _camera.transform.localEulerAngles = new Vector3(cameraDownAngle, 0, 0);
     }
