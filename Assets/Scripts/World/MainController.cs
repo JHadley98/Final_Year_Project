@@ -12,11 +12,11 @@ public class MainController : MonoBehaviour
 
     public float minCameraHeight;
     public float startCameraHeight;
+    private float startBuildTime = 0f;
+
     private Terrain prevTerrain;
 
     public bool terrainsNeeded;
-
-    private float startBuildTime = 0f;
 
     // Start is called before the first frame update
     void Start()
@@ -25,14 +25,12 @@ public class MainController : MonoBehaviour
         _terrain = GetTerrain(_camera.transform.position);
         prevTerrain = _terrain;
         terrainsNeeded = false;
-
     }
 
     // Update is called once per frame
     void Update()
     {
-        // _mapGenerator = gameObject.GetComponent<MapGenerator>();
-
+        // Get terrains position to equal the camera position
         _terrain = GetTerrain(_camera.transform.position);
 
         //Check if terrain has changed from previous one
@@ -40,6 +38,7 @@ public class MainController : MonoBehaviour
         {
             terrainsNeeded = true;
         }
+        // If terrain is needed build new terrain, 1 at time with a 2 second delay between each generation of terrain
         if (terrainsNeeded == true && Time.time - startBuildTime > 2f)
         {
             startBuildTime = Time.time;

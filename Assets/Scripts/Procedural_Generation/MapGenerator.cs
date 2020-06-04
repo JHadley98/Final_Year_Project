@@ -8,7 +8,7 @@ public class MapGenerator : MonoBehaviour
     // Terrain to modify
     public Terrain _terrain;
 
-    // Class referemces
+    // Class references
     public NoiseValues _noiseValues;
     public TexturingTerrain _texturingTerrain;
     public MainController _mainController;
@@ -50,11 +50,14 @@ public class MapGenerator : MonoBehaviour
     private bool terrainFound;
     private int foundTerrainID;
 
+    
+
     void Start()
     {
         // Calculate center of terrain
         terrainCentre = new Vector2(_terrain.terrainData.size.x / 2, _terrain.terrainData.size.z / 2);
 
+        // Loop throug number of terrains applying the heightmap, splatmap and terrain heights
         for (int i = 0; i < numOfTerrains; i++)
         {
             // Set heightmapData to eqaul the perlin noise function, passing in the terrain width, height, noise values applied to map, and random value times 100 to create random terrain seeds
@@ -87,8 +90,6 @@ public class MapGenerator : MonoBehaviour
         //If need new one then add terrain and call setmap to create heights
     }
 
-
-
     public void CreateEndlessTerrain(Terrain _currentTerrain)
     {
         currentTerrainPosition = _currentTerrain.GetPosition();
@@ -107,10 +108,10 @@ public class MapGenerator : MonoBehaviour
         // Create 4 neighbouring terrains in a vector3 terrain (top, bottom, left, right)
         neighbouringTerrain = new Vector3[4];
         // Set 4 default positions around original terrain located at 0, 0, 0
-        neighbouringTerrain[0] = new Vector3(0, 0, defaultTD.size.z);
-        neighbouringTerrain[1] = new Vector3(defaultTD.size.x, 0, 0);
-        neighbouringTerrain[2] = new Vector3(0, 0, -defaultTD.size.z);
-        neighbouringTerrain[3] = new Vector3(-defaultTD.size.x, 0, 0);
+        neighbouringTerrain[0] = new Vector3(0, 0, -defaultTD.size.z);
+        neighbouringTerrain[1] = new Vector3(-defaultTD.size.x, 0, 0);
+        neighbouringTerrain[2] = new Vector3(0, 0, defaultTD.size.z);
+        neighbouringTerrain[3] = new Vector3(defaultTD.size.x, 0, 0);
 
         heightmapData = terrainHeights[terrainNumber];
         
@@ -168,6 +169,7 @@ public class MapGenerator : MonoBehaviour
                 _nextTerrain.terrainData.SetAlphamaps(0, 0, splatData);
 
                 // Check for neighbours
+                //Bottom first
                 terrainFound = false;
                 for (int i = 0; i < _terrains.Length; i++)
                 {
@@ -181,13 +183,94 @@ public class MapGenerator : MonoBehaviour
                 if (terrainFound == true)
                 {
                     // Smooth new terrain to neighbour
-                    //_terrains[foundTerrainID]; is the terrain next to the one we just created
+                    // Stitch edges of neighbouring terrain to smooth out the terrain
                     //_nextTerrain is the terrain just created
+                    //_terrains[foundTerrainID]; is the terrain next to the one we just created
+                    StitchToBottom(_nextTerrain, _terrains[foundTerrainID]);
+
                     // Add neighbour to set neighbours
+                    _nextTerrain.SetNeighbors(_nextTerrain.leftNeighbor, _nextTerrain.topNeighbor, _nextTerrain.rightNeighbor, _terrains[foundTerrainID]);
                     // Add the new terrain to the existing terrain neighbours
+                    _terrains[foundTerrainID].SetNeighbors(_terrains[foundTerrainID].leftNeighbor, _nextTerrain, _terrains[foundTerrainID].rightNeighbor, _terrains[foundTerrainID].bottomNeighbor);
                 }
+
                 // Repeat above for neighbouring terrains one to three
 
+                //Now check left join 
+                terrainFound = false;
+                for (int i = 0; i < _terrains.Length; i++)
+                {
+                    checkTerrainPosition = _terrains[i].GetPosition();
+                    if (checkTerrainPosition == neighbouringTerrain[1] + nextTerrainChunk.transform.position)
+                    {
+                        terrainFound = true;
+                        foundTerrainID = i;
+                    }
+                }
+                if (terrainFound == true)
+                {
+                    // Smooth new terrain to neighbour
+                    // Stitch edges of neighbouring terrain to smooth out the terrain
+                    //_nextTerrain is the terrain just created
+                    //_terrains[foundTerrainID]; is the terrain next to the one we just created
+                    StitchToLeft(_nextTerrain, _terrains[foundTerrainID]);
+
+                    // Add neighbour to set neighbours
+                    _nextTerrain.SetNeighbors(_terrains[foundTerrainID], _nextTerrain.topNeighbor, _nextTerrain.rightNeighbor, _nextTerrain.bottomNeighbor);
+                    // Add the new terrain to the existing terrain neighbours
+                    _terrains[foundTerrainID].SetNeighbors(_terrains[foundTerrainID].leftNeighbor, _terrains[foundTerrainID].topNeighbor, _nextTerrain, _terrains[foundTerrainID].bottomNeighbor);
+                }
+
+                //Now check top join 
+                terrainFound = false;
+                for (int i = 0; i < _terrains.Length; i++)
+                {
+                    checkTerrainPosition = _terrains[i].GetPosition();
+                    if (checkTerrainPosition == neighbouringTerrain[2] + nextTerrainChunk.transform.position)
+                    {
+                        terrainFound = true;
+                        foundTerrainID = i;
+                    }
+                }
+                if (terrainFound == true)
+                {
+                    // Smooth new terrain to neighbour
+                    // Stitch edges of neighbouring terrain to smooth out the terrain
+                    //_nextTerrain is the terrain just created
+                    //_terrains[foundTerrainID]; is the terrain next to the one we just created
+                    StitchToTop(_nextTerrain, _terrains[foundTerrainID]);
+
+                    // Add neighbour to set neighbours
+                    _nextTerrain.SetNeighbors(_nextTerrain.leftNeighbor, _terrains[foundTerrainID], _nextTerrain.rightNeighbor, _nextTerrain.bottomNeighbor);
+                    // Add the new terrain to the existing terrain neighbours
+                    _terrains[foundTerrainID].SetNeighbors(_terrains[foundTerrainID].leftNeighbor, _terrains[foundTerrainID].topNeighbor, _terrains[foundTerrainID].rightNeighbor, _nextTerrain);
+                }
+
+                //Now check right join 
+                terrainFound = false;
+                for (int i = 0; i < _terrains.Length; i++)
+                {
+                    checkTerrainPosition = _terrains[i].GetPosition();
+                    if (checkTerrainPosition == neighbouringTerrain[3] + nextTerrainChunk.transform.position)
+                    {
+                        terrainFound = true;
+                        foundTerrainID = i;
+                    }
+                }
+                if (terrainFound == true)
+                {
+                    // Smooth new terrain to neighbour
+                    // Stitch edges of neighbouring terrain to smooth out the terrain
+                    //_nextTerrain is the terrain just created
+                    //_terrains[foundTerrainID]; is the terrain next to the one we just created
+                    StitchToRight(_nextTerrain, _terrains[foundTerrainID]);
+
+                    // Add neighbour to set neighbours
+                    _nextTerrain.SetNeighbors(_nextTerrain.leftNeighbor, _nextTerrain.topNeighbor, _terrains[foundTerrainID], _nextTerrain.bottomNeighbor);
+                    // Add the new terrain to the existing terrain neighbours
+                    _terrains[foundTerrainID].SetNeighbors(_nextTerrain, _terrains[foundTerrainID].topNeighbor, _terrains[foundTerrainID].rightNeighbor, _terrains[foundTerrainID].bottomNeighbor);
+                }
+                
                 terrainBuilt = true;
             }
         }
@@ -198,46 +281,650 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    public void SetNeighbors(Terrain left, Terrain top, Terrain right, Terrain bottom)
+    
+    /// Stitch bottom of terrain to the neighbour terrain using 4 steps in the function
+    public void StitchToBottom(Terrain terrain, Terrain bottomTerrain)
     {
-        TerrainData terrainData = _terrain.terrainData;
+        /// Step 1:
+        /// Take the last row of bottom terrain and apply heights to first row of new terrain
+        /// 
+
+        TerrainData terrainData = terrain.terrainData;
         int resolution = terrainData.heightmapResolution;
-
-        float[,] leftEdgeValues = left.terrainData.GetHeights(resolution - 1, 0, 1, resolution);
-        float[,] righttEdgeValues = right.terrainData.GetHeights(1, resolution, resolution - 1, 0);
-        float[,] topEdgeValues = top.terrainData.GetHeights(resolution, 1, 0, resolution - 1);
-        float[,] bottomEdgeValues = bottom.terrainData.GetHeights(0, resolution - 1, resolution, 1);
-
-        terrainData.SetHeights(0, 0, leftEdgeValues);
-        terrainData.SetHeights(0, 0, topEdgeValues);
-        terrainData.SetHeights(0, 0, righttEdgeValues);
-        terrainData.SetHeights(0, 0, bottomEdgeValues);
-    }
-
-    public void StitchToLeft(Terrain terrain, Terrain leftNeighbor)
-    {
-        TerrainData data = terrain.terrainData;
-        int resolution = data.heightmapResolution;
-
-        // Take the last x-column of neighbors heightmap array
-        // 1 pixel wide (single x value), resolution pixels tall (all y values)
-        float[,] edgeValues = leftNeighbor.terrainData.GetHeights(resolution - 1, 0, 1, resolution);
-
-        // Stitch with other terrain by setting same heightmap values on the edge
-        data.SetHeights(0, 0, edgeValues);
-    }
-
-    public void StitchToBottom(Terrain terrain, Terrain bottomNeighbor)
-    {
-        TerrainData data = terrain.terrainData;
-        int resolution = data.heightmapResolution;
 
         // Take the top y-column of neighbors heightmap array
         // resolution pixels wide (all x values), 1 pixel tall (single y value)
-        float[,] edgeValues = bottomNeighbor.terrainData.GetHeights(0, resolution - 1, resolution, 1);
+        float[,] edgeValues = bottomTerrain.terrainData.GetHeights(0, resolution - 1, resolution, 1);
 
         // Stitch with other terrain by setting same heightmap values on the edge
-        data.SetHeights(0, 0, edgeValues);
+        terrainData.SetHeights(0, 0, edgeValues);
+
+        /// 
+        /// Step 2: 
+        /// Blend 10% of heights in new terrain to the height of the first row of the new terrain
+        /// First row of the new terrain is the same as bottom terrain
+        /// 
+
+        // Get current values of bottom 10% of heights to be smoothed
+        int xSize = terrainData.heightmapWidth;                             // Full width of terrain
+        int ySize = (int)(terrainData.heightmapHeight * 0.1f);              // 10% of height
+        float[,] startValues = terrainData.GetHeights(0, 0, xSize, ySize);  // Put current heights into array (x and y goes in reverse)
+        float[,] endValues = new float[ySize,xSize];                        // Create array for new heights
+
+        // Smooth out terrain based on a propotion of original terrain and the edge with the neighbour
+        float propotionOfOriginal;                                          // Propotion of original height to be used in the new height
+        float propotionOfTarget;                                            // Propotion of target height to be used in the new height
+
+        // To avoid a sudden change at 10% mark we vary the percentage where the change starts
+        // This is based on the difference in height between edge and 10% mark
+        float variationValue;                                               // Value for the variation in the blend
+        float blendLimit;                                                   // The actual limit that the blending is done up to 
+        float heightDiff;                                                   // Difference in height where heights are always between 0 and 1
+
+        // Loop through all the X's and Y's in the startValues array to workout the new values
+        for (int x = 0; x < xSize; x++)
+        {
+            // Difference in height between start and end
+            heightDiff = Mathf.Abs(startValues[0, x] - startValues[ySize - 1, x]);          
+            
+            // Variation value is based on height difference, big height differences give big values, so blending is over a bigger distance
+            variationValue = Mathf.InverseLerp(0, 0.6f, heightDiff);
+            
+            // Limit variation value to 1
+            if (variationValue > 1) 
+            { 
+                variationValue = 1; 
+            }
+
+            // Blend limit is 75% to 100% of blend region (ySize - 1, needs -1 as counting starts at 0)
+            blendLimit = (0.75f * (ySize - 1)) + (0.25f * (ySize - 1) * variationValue);  
+
+            for (int y = 0; y < ySize; y++)
+            {
+                propotionOfOriginal = Mathf.InverseLerp(0, blendLimit, y);  // InverseLerp gives a decimal 0 to 1 of where Y is from 0 to blend limit
+                
+                if (propotionOfOriginal > 1)                                // Propotion of the original cannot be more than 1
+                {
+                    propotionOfOriginal = 1;
+                }
+                propotionOfTarget = 1 - propotionOfOriginal;                // Propotion of target and original always add up to 1
+
+                // Workout new height
+                // startValues 0,x is the height at the edge of the terrain which is blended to
+                endValues[y, x] = (propotionOfOriginal * startValues[y, x]) + (propotionOfTarget * startValues[0, x]);
+            }
+        }
+
+        // Apply new heights to terrain
+        terrainData.SetHeights(0, 0, endValues);
+
+        /// 
+        /// Step 3:
+        /// Blend heights 2% either side of join with a target that is an average of the heights from both terrains and the seam height
+        /// This is to avoid sudden changes in direction
+        /// 
+
+        ySize = (int)(terrainData.heightmapHeight * 0.02f);                         // Update ySize to do 2% to fix stitching
+        float[,] startStitchValues1 = terrainData.GetHeights(0, 0, xSize, ySize);   // Put current stitch values to into an array (terrain)
+        float[,] endStitchValues1 = new float[ySize, xSize];                        // Create array to store new heights for the end of the stitch (terrain)
+
+        // Start stitch values for bottom terrain, setting the yBase to be the max heightmap height of the bottom terrain -ySize (2% of the terrain height being stitched)
+        float[,] startStitchValues2 = bottomTerrain.terrainData.GetHeights(0, bottomTerrain.terrainData.heightmapHeight -1 - ySize, xSize, ySize);
+        
+        // Store new heights for the end of the stitch (bottomTerrain)
+        float[,] endStitchValues2 = new float[ySize, xSize];
+
+        // ???
+        float targetStitchHeight;                               
+
+        // Loop through all the X's and Y's in the start stitch values
+        for (int y = 0; y < ySize; y++)
+        {
+            propotionOfOriginal = Mathf.InverseLerp(0, ySize - 1, y);   // InverseLerp gives a decimal 0 to 1 of where Y is from ySize(2% of heightmap height) - 1
+            propotionOfTarget = 1 - propotionOfOriginal;                // Propotion of target and original always add up to 1
+            for (int x = 0; x < xSize; x++)
+            {
+                // ???
+                targetStitchHeight = (startStitchValues1[ySize - 1, x] + startStitchValues1[0, x] + startStitchValues2[0, x]) / 3;
+                // Workout new height
+                // startStitchValues1 blends the stitch from the original propotion plus the propotion target(terrain) times by the targetStitchHeight
+                endStitchValues1[y, x] = (propotionOfOriginal * startStitchValues1[y, x]) + (propotionOfTarget * targetStitchHeight);
+                // startStitchValues1 blends the stitch from the original propotion plus the propotion target(bottom terrain) times by the targetStitchHeight
+                endStitchValues2[y, x] = (propotionOfTarget * startStitchValues2[y, x]) + (propotionOfOriginal * targetStitchHeight);
+            }
+        }
+        // Apply new heights to both terrains
+        terrainData.SetHeights(0, 0, endStitchValues1);
+        bottomTerrain.terrainData.SetHeights(0, bottomTerrain.terrainData.heightmapHeight - ySize, endStitchValues2);
+
+
+
+
+
+        edgeValues = bottomTerrain.terrainData.GetHeights(0, resolution - 1, resolution, 1);
+
+        // Stitch with other terrain by setting same heightmap values on the edge
+        terrainData.SetHeights(0, 0, edgeValues);
+
+
+        ///
+        /// Step 4:
+        /// Blend splatmaps from 2% either side of join
+        /// 
+
+        // Update part of splatmap to reflect the change in heights
+        //_texturingTerrain.PartialSplatMap(terrainData, 0, 0, (int)(terrainData.alphamapWidth * 0.1f), terrainData.alphamapHeight);
+        _texturingTerrain.SplatMap(terrain);
+        // Set splat width and height equal to alphamap values
+        int splatWidth = terrainData.alphamapWidth;
+        int splatHeight = terrainData.alphamapHeight;
+        
+        float[,,] splatMap1 = terrain.terrainData.GetAlphamaps(0, 0, splatWidth, splatHeight);          // Put the current terrains splatmap width and height into an array
+        float[,,] splatMap2 = bottomTerrain.terrainData.GetAlphamaps(0, 0, splatWidth, splatHeight);    // Put the bottom terrains splatmap width and height into an array
+        
+        int numOfSplats = terrain.terrainData.terrainLayers.Length;                                     // Set number of splats available equal to the terrainlayers length (6)
+        int ySplatMapPart = (int)(splatHeight * 0.02f);                                                 // Blend the splatmaps from both terrains at 0.02 from join
+
+        // Loop through all the X's and Y's in the splatmap
+        for (int y = 0; y < ySplatMapPart; y++)
+        {
+            propotionOfOriginal = (Mathf.InverseLerp(0, ySplatMapPart, y) / 2) + 0.5f;  // InverseLerp gives a decimal 0 to 1 of where Y is from ySplatMapPart(blend 2% splatmap height)
+            propotionOfTarget = 1 - propotionOfOriginal;                                // Propotion of target and original always add up to 1
+            for (int x = 0; x < splatWidth; x++)
+            {
+                for (int j = 0; j < numOfSplats; j++)
+                {
+                    // Update splatmap based on propotion of original side and other side of seam
+                    splatMap1[y, x, j] = propotionOfOriginal * splatMap1[(int)(propotionOfOriginal * ySplatMapPart), x, j] + 
+                                         propotionOfTarget * splatMap2[splatHeight - 1 - (int)(propotionOfTarget * ySplatMapPart), x, j];
+
+                    // Repeat for splatmap on other side of seam
+                    splatMap2[splatHeight - 1 - y, x, j] = propotionOfTarget * splatMap1[(int)(propotionOfTarget * ySplatMapPart), x, j] + 
+                                                           propotionOfOriginal * splatMap2[splatHeight - 1 - (int)(propotionOfOriginal * ySplatMapPart), x, j];
+                }
+            }
+        }
+        // Apply terrain splatmap
+        terrain.terrainData.SetAlphamaps(0, 0, splatMap1);
+        // Apply bottom terrain splatmap
+        bottomTerrain.terrainData.SetAlphamaps(0, 0, splatMap2);
+    }
+
+    
+    /// Stitch top of terrain to the neighbour terrain using 4 steps in the function
+    public void StitchToTop(Terrain terrain, Terrain topTerrain)
+    {
+        /// Step 1:
+        /// Take the last row of bottom terrain and apply heights to first row of new terrain
+        /// 
+
+        TerrainData terrainData = terrain.terrainData;
+        int resolution = terrainData.heightmapResolution;
+
+        // Take the top y-column of neighbors heightmap array
+        // resolution pixels wide (all x values), 1 pixel tall (single y value)
+        float[,] edgeValues = topTerrain.terrainData.GetHeights(0, 0, resolution, 1);
+
+        // Stitch with other terrain by setting same heightmap values on the edge
+        terrainData.SetHeights(0, resolution - 1, edgeValues);
+
+        /// 
+        /// Step 2: 
+        /// Blend 10% of heights in new terrain to the height of the first row of the new terrain
+        /// First row of the new terrain is the same as bottom terrain
+        /// 
+
+        // Get current values of bottom 10% of heights to be smoothed
+        int xSize = terrainData.heightmapWidth;                             // Full width of terrain
+        int ySize = (int)(terrainData.heightmapHeight * 0.1f);              // 10% of height
+        float[,] startValues = terrainData.GetHeights(0, terrainData.heightmapHeight - 1 - ySize, xSize, ySize);  // Put current heights into array (x and y goes in reverse)
+        float[,] endValues = new float[ySize, xSize];                       // Create array for new heights
+
+        // Smooth out terrain based on a propotion of original terrain and the edge with the neighbour
+        float propotionOfOriginal;                                          // Propotion of original height to be used in the new height
+        float propotionOfTarget;                                            // Propotion of target height to be used in the new height
+
+        // To avoid a sudden change at 10% mark we vary the percentage where the change starts
+        // This is based on the difference in height between edge and 10% mark
+        float variationValue;                                               // Value for the variation in the blend
+        float blendLimit;                                                   // The actual limit that the blending is done up to 
+        float heightDiff;                                                   // Difference in height where heights are always between 0 and 1
+
+        // Loop through all the X's and Y's in the startValues array to workout the new values
+        for (int x = 0; x < xSize; x++)
+        {
+            // Difference in height between start and end
+            heightDiff = Mathf.Abs(startValues[0, x] - startValues[ySize - 1, x]);
+
+            // Variation value is based on height difference, big height differences give big values, so blending is over a bigger distance
+            variationValue = Mathf.InverseLerp(0, 0.6f, heightDiff);
+
+            // Limit variation value to 1
+            if (variationValue > 1)
+            {
+                variationValue = 1;
+            }
+
+            // Blend limit is 75% to 100% of blend region (ySize - 1, needs -1 as counting starts at 0)
+            blendLimit = (0.75f * (ySize - 1)) + (0.25f * (ySize - 1) * variationValue);
+
+            for (int y = 0; y < ySize; y++)
+            {
+                propotionOfOriginal =  Mathf.InverseLerp(0, blendLimit, ySize - 1 - y);  // InverseLerp gives a decimal 0 to 1 of where Y is from 0 to blend limit, ysize-y used as y=0 is 100% original
+
+                if (propotionOfOriginal > 1)                                // Propotion of the original cannot be more than 1
+                {
+                    propotionOfOriginal = 1;
+                }
+                propotionOfTarget = 1 - propotionOfOriginal;                // Propotion of target and original always add up to 1
+
+                // Workout new height
+                // startValues 0,x is the height at the edge of the terrain which is blended to
+                endValues[y, x] = (propotionOfOriginal * startValues[y, x]) + (propotionOfTarget * startValues[ySize - 1, x]);
+            }
+        }
+
+        // Apply new heights to terrain
+        terrainData.SetHeights(0, terrainData.heightmapHeight - ySize, endValues);
+
+        /// 
+        /// Step 3:
+        /// Blend heights 2% either side of join with a target that is an average of the heights from both terrains and the seam height
+        /// This is to avoid sudden changes in direction
+        /// 
+
+        ySize = (int)(terrainData.heightmapHeight * 0.02f);                         // Update ySize to do 2% to fix stitching
+        float[,] startStitchValues1 = terrainData.GetHeights(0, terrainData.heightmapHeight - 1 - ySize, xSize, ySize);   // Put current stitch values to into an array (terrain)
+        float[,] endStitchValues1 = new float[ySize, xSize];                        // Create array to store new heights for the end of the stitch (terrain)
+
+        // Start stitch values for bottom terrain, setting the yBase to be the max heightmap height of the topTerrain -ySize (2% of the terrain height being stitched)
+        float[,] startStitchValues2 = topTerrain.terrainData.GetHeights(0, 0, xSize, ySize);
+
+        // Store new heights for the end of the stitch (bottomTerrain)
+        float[,] endStitchValues2 = new float[ySize, xSize];
+
+        float targetStitchHeight;
+
+        // Loop through all the X's and Y's in the start stitch values
+        for (int y = 0; y < ySize; y++)
+        {
+            propotionOfOriginal = Mathf.InverseLerp(0, ySize - 1, y);   // InverseLerp gives a decimal 0 to 1 of where Y is from ySize(2% of heightmap height) - 1
+            propotionOfTarget = 1 - propotionOfOriginal;                // Propotion of target and original always add up to 1
+            for (int x = 0; x < xSize; x++)
+            {
+                // Take the average of heights from the join and 2% either side to give a target height to aim for
+                targetStitchHeight = (startStitchValues1[ySize - 1, x] + startStitchValues1[0, x] + startStitchValues2[0, x]) / 3;
+                // Workout new height
+                // startStitchValues1 blends the stitch from the original propotion plus the propotion target(terrain) times by the targetStitchHeight
+                endStitchValues1[y, x] = (propotionOfTarget * startStitchValues1[y, x]) + (propotionOfOriginal * targetStitchHeight);
+                // startStitchValues1 blends the stitch from the original propotion plus the propotion target(bottom terrain) times by the targetStitchHeight
+                endStitchValues2[y, x] = (propotionOfOriginal * startStitchValues2[y, x]) + (propotionOfTarget * targetStitchHeight);
+            }
+        }
+        // Apply new heights to both terrains
+        terrainData.SetHeights(0, terrainData.heightmapHeight - ySize, endStitchValues1);
+        topTerrain.terrainData.SetHeights(0, 0, endStitchValues2);
+
+        /// 
+        /// Step 4:
+        /// Blend splatmaps from 2% either side of join
+        /// 
+
+        // Update part of splatmap to reflect the change in heights from above code
+        // _texturingTerrain.PartialSplatMap(terrainData,  terrainData.alphamapHeight - 1 - (int)(terrainData.alphamapHeight * 0.1f), 0, (int)(terrainData.alphamapWidth * 0.1f), terrainData.alphamapHeight);
+        _texturingTerrain.SplatMap(terrain);
+        // Set splat width and height equal to alphamap values
+        int splatWidth = terrainData.alphamapWidth;
+        int splatHeight = terrainData.alphamapHeight;
+
+        float[,,] splatMap1 = terrain.terrainData.GetAlphamaps(0, 0, splatWidth, splatHeight);          // Assign the current terrains splatmap width and height into an array
+        float[,,] splatMap2 = topTerrain.terrainData.GetAlphamaps(0, 0, splatWidth, splatHeight);       // Assign the topTerrains splatmap width and height into an array
+        
+        int numOfSplats = terrain.terrainData.terrainLayers.Length;                                     // Set number of splats available equal to the terrainlayers length (6)
+        int ySplatMapPart = (int)(splatHeight * 0.02f);                                                 // Blend the splatmaps from both terrains at 0.02 from join
+
+        // Loop through all the X's and Y's in the splatmap
+        for (int y = 0; y < ySplatMapPart; y++)
+        {
+            propotionOfOriginal = (Mathf.InverseLerp(0, ySplatMapPart, y) / 2) + 0.5f;  // InverseLerp gives a decimal 0.5 to 1 of where Y is from ySplatMapPart(blend 2% splatmap height)
+            propotionOfTarget = 1 - propotionOfOriginal;                                // Propotion of target and original always add up to 1
+            for (int x = 0; x < splatWidth; x++)
+            {
+                for (int j = 0; j < numOfSplats; j++)
+                {
+                    // Update splatmap based on propotion of original side and other side of seam
+                    splatMap1[splatHeight - 1 - y, x, j] = propotionOfOriginal * splatMap1[splatHeight - 1 - (int)(propotionOfOriginal * ySplatMapPart), x, j] +
+                                         propotionOfTarget * splatMap2[(int)(propotionOfTarget * ySplatMapPart), x, j];
+
+                    // Repeat for splatmap on other side of seam
+                    splatMap2[y, x, j] = propotionOfTarget * splatMap1[splatHeight - 1 - (int)(propotionOfTarget * ySplatMapPart), x, j] +
+                                                           propotionOfOriginal * splatMap2[(int)(propotionOfOriginal * ySplatMapPart), x, j];
+                }
+            }
+        }
+        // Apply terrain splatmap
+        terrain.terrainData.SetAlphamaps(0, 0, splatMap1);
+        // Apply bottom terrain splatmap
+        topTerrain.terrainData.SetAlphamaps(0, 0, splatMap2);
+    }
+
+    public void StitchToRight(Terrain terrain, Terrain rightTerrain)
+    {
+        /// Step 1:
+        /// Take the last row of bottom terrain and apply heights to first row of new terrain
+        /// 
+
+        TerrainData terrainData = terrain.terrainData;
+        int resolution = terrainData.heightmapResolution;
+
+        // Take the top y-column of neighbors heightmap array
+        // resolution pixels wide (all x values), 1 pixel tall (single y value)
+        float[,] edgeValues = rightTerrain.terrainData.GetHeights(0, 0,  1, resolution);
+
+        // Stitch with other terrain by setting same heightmap values on the edge
+        terrainData.SetHeights(resolution - 1, 0, edgeValues);
+
+        /// 
+        /// Step 2: 
+        /// Blend 10% of heights in new terrain to the height of the first row of the new terrain
+        /// First row of the new terrain is the same as bottom terrain
+        /// 
+
+        // Get current values of right 10% of widths to be smoothed
+        int xSize = (int)(terrainData.heightmapWidth * 0.1f);                             // 10% of width
+        int ySize = terrainData.heightmapHeight;              // Full height
+        float[,] startValues = terrainData.GetHeights(terrainData.heightmapWidth - 1 - xSize, 0, xSize, ySize);  // Put current heights into array (x and y goes in reverse)
+        float[,] endValues = new float[ySize, xSize];                       // Create array for new heights
+
+        // Smooth out terrain based on a propotion of original terrain and the edge with the neighbour
+        float propotionOfOriginal;                                          // Propotion of original height to be used in the new height
+        float propotionOfTarget;                                            // Propotion of target height to be used in the new height
+
+        // To avoid a sudden change at 10% mark we vary the percentage where the change starts
+        // This is based on the difference in height between edge and 10% mark
+        float variationValue;                                               // Value for the variation in the blend
+        float blendLimit;                                                   // The actual limit that the blending is done up to 
+        float heightDiff;                                                   // Difference in height where heights are always between 0 and 1
+
+        // Loop through all the X's and Y's in the startValues array to workout the new values
+        for (int y = 0; y < ySize; y++)
+        {
+            // Difference in height between start and end
+            heightDiff = Mathf.Abs(startValues[y, 0] - startValues[y, xSize - 1]);
+
+            // Variation value is based on height difference, big height differences give big values, so blending is over a bigger distance
+            variationValue = Mathf.InverseLerp(0, 0.6f, heightDiff);
+
+            // Limit variation value to 1
+            if (variationValue > 1)
+            {
+                variationValue = 1;
+            }
+
+            // Blend limit is 75% to 100% of blend region (xSize - 1, needs -1 as counting starts at 0)
+            blendLimit = (0.75f * (xSize - 1)) + (0.25f * (xSize - 1) * variationValue);
+
+            
+            for (int x = 0; x < xSize; x++)
+            {
+                propotionOfOriginal = Mathf.InverseLerp(0, blendLimit, xSize - 1 - x);  // InverseLerp gives a decimal 0 to 1 of where X is from 0 to blend limit
+
+                if (propotionOfOriginal > 1)                                // Propotion of the original cannot be more than 1
+                {
+                    propotionOfOriginal = 1;
+                }
+                propotionOfTarget = 1 - propotionOfOriginal;                // Propotion of target and original always add up to 1
+
+                // Workout new height
+                // startValues 0,x is the height at the edge of the terrain which is blended to
+                endValues[y, x] = (propotionOfOriginal * startValues[y, x]) + (propotionOfTarget * startValues[y, xSize - 1]);
+            }
+        }
+
+        // Apply new heights to terrain
+        terrainData.SetHeights(terrainData.heightmapWidth - xSize, 0, endValues);
+
+        /// 
+        /// Step 3:
+        /// Blend heights 2% either side of join with a target that is an average of the heights from both terrains and the seam height
+        /// This is to avoid sudden changes in direction
+        /// 
+
+        xSize = (int)(terrainData.heightmapWidth * 0.02f);                       // Update xSize to do 2% to fix stitching
+        float[,] startStitchValues1 = terrainData.GetHeights(terrainData.heightmapWidth - 1 - xSize, 0, xSize, ySize);   // Put current stitch values to into an array (terrain)
+        float[,] endStitchValues1 = new float[ySize, xSize];                        // Create array to store new heights for the end of the stitch (terrain)
+
+        // Start stitch values for right terrain, xbase and ybase both 0 as array starts at bottom left of the right terrain
+        float[,] startStitchValues2 = rightTerrain.terrainData.GetHeights(0, 0, xSize, ySize);
+
+        // Store new heights for the end of the stitch (bottomTerrain)
+        float[,] endStitchValues2 = new float[ySize, xSize];
+
+        float targetStitchHeight;
+
+        // Loop through all the X's and Y's in the start stitch values
+        for (int x = 0; x < xSize; x++)
+        {
+            propotionOfOriginal = Mathf.InverseLerp(0, xSize - 1, x);   // InverseLerp gives a decimal 0 to 1 of where X is from ySize(2% of heightmap height) - 1
+            propotionOfTarget = 1 - propotionOfOriginal;                // Propotion of target and original always add up to 1
+            
+            for (int y = 0; y < ySize; y++)
+                {
+                // Target height is average of the current join and 2% either side of that
+                targetStitchHeight = (startStitchValues1[y, xSize - 1] + startStitchValues1[y, 0] + startStitchValues2[y, 0]) / 3;
+                // Workout new height
+                // startStitchValues1 blends the stitch from the original propotion plus the propotion target(terrain) times by the targetStitchHeight
+                endStitchValues1[y, x] = (propotionOfTarget * startStitchValues1[y, x]) + (propotionOfOriginal * targetStitchHeight);
+                // startStitchValues1 blends the stitch from the original propotion plus the propotion target(bottom terrain) times by the targetStitchHeight
+                endStitchValues2[y, x] = (propotionOfOriginal * startStitchValues2[y, x]) + (propotionOfTarget * targetStitchHeight);
+            }
+        }
+        // Apply new heights to both terrains
+        terrainData.SetHeights(terrainData.heightmapWidth - xSize, 0, endStitchValues1);
+        rightTerrain.terrainData.SetHeights(0, 0, endStitchValues2);
+
+        /// 
+        /// Step 4:
+        /// Blend splatmaps from 2% either side of join
+        /// 
+
+        // Update part of splatmap to reflect the change in heights
+        //_texturingTerrain.PartialSplatMap(terrainData, 0, terrainData.alphamapWidth - 1 - (int)(terrainData.alphamapWidth * 0.1f),  terrainData.alphamapHeight, (int)(terrainData.alphamapWidth * 0.1f) );
+        _texturingTerrain.SplatMap(terrain);
+
+        // Set splat width and height equal to alphamap values
+        int splatWidth = terrainData.alphamapWidth;
+        int splatHeight = terrainData.alphamapHeight;
+
+        float[,,] splatMap1 = terrain.terrainData.GetAlphamaps(0, 0, splatWidth, splatHeight);          // Assign the current terrains splatmap width and height into an array
+        float[,,] splatMap2 = rightTerrain.terrainData.GetAlphamaps(0, 0, splatWidth, splatHeight);       // Assign the topTerrains splatmap width and height into an array
+        
+        int numOfSplats = terrain.terrainData.terrainLayers.Length;                                     // Set number of splats available equal to the terrainlayers length (6)
+        int xSplatMapPart = (int)(splatWidth * 0.02f);                                                 // Blend the splatmaps from both terrains at 0.02 from join
+
+        // Loop through all the X's and Y's in the splatmap
+        for (int x = 0; x < xSplatMapPart; x++)
+        {
+            propotionOfOriginal = (Mathf.InverseLerp(0, xSplatMapPart, x) / 2) + 0.5f;  // InverseLerp gives a decimal 0.5 to 1 of where X is from xSplatMapPart(blend 2% splatmap height)
+            propotionOfTarget = 1 - propotionOfOriginal;                                // Propotion of target and original always add up to 1
+            
+            for (int y = 0; y < splatHeight; y++)
+                {
+                for (int j = 0; j < numOfSplats; j++)
+                {
+                    // Update splatmap based on propotion of original side and other side of seam
+                    splatMap1[y, splatWidth - 1 - x, j] = propotionOfOriginal * splatMap1[y, splatWidth - 1 - (int)(propotionOfOriginal * xSplatMapPart), j] +
+                                         propotionOfTarget * splatMap2[y, (int)(propotionOfTarget * xSplatMapPart), j];
+
+                    // Repeat for other splatmap
+                    splatMap2[y, x, j] = propotionOfTarget * splatMap1[y, splatWidth - 1 - (int)(propotionOfTarget * xSplatMapPart), j] +
+                                                           propotionOfOriginal * splatMap2[y, (int)(propotionOfOriginal * xSplatMapPart), j];
+                }
+            }
+        }
+        // Apply terrain splatmap
+        terrain.terrainData.SetAlphamaps(0, 0, splatMap1);
+        // Apply bottom terrain splatmap
+        rightTerrain.terrainData.SetAlphamaps(0, 0, splatMap2);
+    }
+
+    public void StitchToLeft(Terrain terrain, Terrain leftTerrain)
+    {
+        /// Step 1:
+        /// Take the last row of bottom terrain and apply heights to first row of new terrain
+        /// 
+
+        TerrainData terrainData = terrain.terrainData;
+        int resolution = terrainData.heightmapResolution;
+
+        // Take the top y-column of neighbors heightmap array
+        // resolution pixels wide (all x values), 1 pixel tall (single y value)
+        float[,] edgeValues = leftTerrain.terrainData.GetHeights(resolution - 1, 0, 1, resolution);
+
+        // Stitch with other terrain by setting same heightmap values on the edge
+        terrainData.SetHeights(0, 0, edgeValues);
+
+        /// 
+        /// Step 2: 
+        /// Blend 10% of heights in new terrain to the height of the first row of the new terrain
+        /// First row of the new terrain is the same as bottom terrain
+        /// 
+
+        // Get current values of right 10% of widths to be smoothed
+        int xSize = (int)(terrainData.heightmapWidth * 0.1f);                             // 10% of width
+        int ySize = terrainData.heightmapHeight;              // Full height
+        float[,] startValues = terrainData.GetHeights(0, 0, xSize, ySize);  // Put current heights into array (x and y goes in reverse)
+        float[,] endValues = new float[ySize, xSize];                       // Create array for new heights
+
+        // Smooth out terrain based on a propotion of original terrain and the edge with the neighbour
+        float propotionOfOriginal;                                          // Propotion of original height to be used in the new height
+        float propotionOfTarget;                                            // Propotion of target height to be used in the new height
+
+        // To avoid a sudden change at 10% mark we vary the percentage where the change starts
+        // This is based on the difference in height between edge and 10% mark
+        float variationValue;                                               // Value for the variation in the blend
+        float blendLimit;                                                   // The actual limit that the blending is done up to 
+        float heightDiff;                                                   // Difference in height where heights are always between 0 and 1
+
+        // Loop through all the X's and Y's in the startValues array to workout the new values
+        for (int y = 0; y < ySize; y++)
+        {
+            // Difference in height between start and end
+            heightDiff = Mathf.Abs(startValues[y, 0] - startValues[y, xSize - 1]);
+
+            // Variation value is based on height difference, big height differences give big values, so blending is over a bigger distance
+            variationValue = Mathf.InverseLerp(0, 0.6f, heightDiff);
+
+            // Limit variation value to 1
+            if (variationValue > 1)
+            {
+                variationValue = 1;
+            }
+
+            // Blend limit is 75% to 100% of blend region (xSize - 1, needs -1 as counting starts at 0)
+            blendLimit = (0.75f * (xSize - 1)) + (0.25f * (xSize - 1) * variationValue);
+
+
+            for (int x = 0; x < xSize; x++)
+            {
+                propotionOfOriginal = Mathf.InverseLerp(0, blendLimit, x);  // InverseLerp gives a decimal 0 to 1 of where X is from 0 to blend limit
+
+                if (propotionOfOriginal > 1)                                // Propotion of the original cannot be more than 1
+                {
+                    propotionOfOriginal = 1;
+                }
+                propotionOfTarget = 1 - propotionOfOriginal;                // Propotion of target and original always add up to 1
+
+                // Workout new height
+                // startValues 0,x is the height at the edge of the terrain which is blended to
+                endValues[y, x] = (propotionOfOriginal * startValues[y, x]) + (propotionOfTarget * startValues[y, 0]);
+            }
+        }
+
+        // Apply new heights to terrain
+        terrainData.SetHeights(0, 0, endValues);
+
+        /// 
+        /// Step 3:
+        /// Blend heights 2% either side of join with a target that is an average of the heights from both terrains and the seam height
+        /// This is to avoid sudden changes in direction
+        /// 
+
+        xSize = (int)(terrainData.heightmapWidth * 0.02f);                       // Update xSize to do 2% to fix stitching
+        float[,] startStitchValues1 = terrainData.GetHeights(0, 0, xSize, ySize);   // Put current stitch values to into an array (terrain)
+        float[,] endStitchValues1 = new float[ySize, xSize];                        // Create array to store new heights for the end of the stitch (terrain)
+
+        // Start stitch values for right terrain, xbase and ybase both 0 as array starts at bottom left of the right terrain
+        float[,] startStitchValues2 = leftTerrain.terrainData.GetHeights(terrainData.heightmapWidth - 1 - xSize, 0, xSize, ySize);
+
+        // Store new heights for the end of the stitch (bottomTerrain)
+        float[,] endStitchValues2 = new float[ySize, xSize];
+
+        float targetStitchHeight;
+
+        // Loop through all the X's and Y's in the start stitch values
+        for (int x = 0; x < xSize; x++)
+        {
+            propotionOfOriginal = Mathf.InverseLerp(0, xSize - 1, x);   // InverseLerp gives a decimal 0 to 1 of where X is from ySize(2% of heightmap height) - 1
+            propotionOfTarget = 1 - propotionOfOriginal;                // Propotion of target and original always add up to 1
+
+            for (int y = 0; y < ySize; y++)
+            {
+                // Target height is average of the current join and 2% either side of that
+                targetStitchHeight = (startStitchValues1[y, xSize - 1] + startStitchValues1[y, 0] + startStitchValues2[y, 0]) / 3;
+                // Workout new height
+                // startStitchValues1 blends the stitch from the original propotion plus the propotion target(terrain) times by the targetStitchHeight
+                endStitchValues1[y, x] = (propotionOfOriginal * startStitchValues1[y, x]) + (propotionOfTarget * targetStitchHeight);
+                // startStitchValues1 blends the stitch from the original propotion plus the propotion target(bottom terrain) times by the targetStitchHeight
+                endStitchValues2[y, x] = (propotionOfTarget * startStitchValues2[y, x]) + (propotionOfOriginal * targetStitchHeight);
+            }
+        }
+        // Apply new heights to both terrains
+        terrainData.SetHeights(0, 0, endStitchValues1);
+        leftTerrain.terrainData.SetHeights(terrainData.heightmapWidth - xSize, 0, endStitchValues2);
+
+        /// 
+        /// Step 4:
+        /// Blend splatmaps from 2% either side of join
+        /// 
+
+        // Update part of splatmap to reflect the change in heights
+        //_texturingTerrain.PartialSplatMap(terrainData, 0, 0, terrainData.alphamapHeight, (int)(terrainData.alphamapWidth * 0.1f));
+        _texturingTerrain.SplatMap(terrain);
+        // Set splat width and height equal to alphamap values
+        int splatWidth = terrainData.alphamapWidth;
+        int splatHeight = terrainData.alphamapHeight;
+
+        float[,,] splatMap1 = terrain.terrainData.GetAlphamaps(0, 0, splatWidth, splatHeight);          // Assign the current terrains splatmap width and height into an array
+        float[,,] splatMap2 = leftTerrain.terrainData.GetAlphamaps(0, 0, splatWidth, splatHeight);       // Assign the topTerrains splatmap width and height into an array
+
+        int numOfSplats = terrain.terrainData.terrainLayers.Length;                                     // Set number of splats available equal to the terrainlayers length (6)
+        int xSplatMapPart = (int)(splatWidth * 0.02f);                                                 // Blend the splatmaps from both terrains at 0.02 from join
+
+        // Loop through all the X's and Y's in the splatmap
+        for (int x = 0; x < xSplatMapPart; x++)
+        {
+            propotionOfOriginal = (Mathf.InverseLerp(0, xSplatMapPart, x) / 2) + 0.5f;  // InverseLerp gives a decimal 0.5 to 1 of where X is from xSplatMapPart(blend 2% splatmap height)
+            propotionOfTarget = 1 - propotionOfOriginal;                                // Propotion of target and original always add up to 1
+
+            for (int y = 0; y < splatHeight; y++)
+            {
+                for (int j = 0; j < numOfSplats; j++)
+                {
+                    // Update splatmap based on propotion of original side and other side of seam
+                    splatMap1[y, x, j] = propotionOfOriginal * splatMap1[y, (int)(propotionOfOriginal * xSplatMapPart), j] +
+                                         propotionOfTarget * splatMap2[y, splatWidth - 1 - (int)(propotionOfTarget * xSplatMapPart), j];
+
+                    // Repeat for other splatmap
+                    splatMap2[y, splatWidth - 1 - x, j] = propotionOfTarget * splatMap1[y, (int)(propotionOfTarget * xSplatMapPart), j] +
+                                                           propotionOfOriginal * splatMap2[y, splatWidth - 1 - (int)(propotionOfOriginal * xSplatMapPart), j];
+                }
+            }
+        }
+        // Apply terrain splatmap
+        terrain.terrainData.SetAlphamaps(0, 0, splatMap1);
+        // Apply bottom terrain splatmap
+        leftTerrain.terrainData.SetAlphamaps(0, 0, splatMap2);
     }
 
     public float[,] SetPerlinNoise(int width, int height, NoiseValues _noiseValues, Vector2 sampleCentre, int seed)
@@ -313,37 +1000,25 @@ public class MapGenerator : MonoBehaviour
                     if (perlinNoiseHeight < minNoiseHeight)
                     {
                         minNoiseHeight = perlinNoiseHeight;
-                    }
-
-                    // Doing this creates a flat border around whole terrain 
-                    //if (x < 0.1 * width || x > 0.9 * width || y < 0.1 * height || y > 0.9 * height)
-                    //{
-                    //    perlinNoiseHeight *= 0.5f;
-                    //    perlinNoiseHeight = perlinNoiseHeight * 0.5f;
-                    //    +(maxNoiseHeight - minNoiseHeight) / 2;
-
-                    //}
-
-                    // Set array map[x, y] equal to perlinNoiseHeight
-                    
+                    }                    
                 }
                 map[x, y] = perlinNoiseHeight;
             }
         }
 
-
-        float pointheight;
-        float pointheightmultiplier;
+        float pointHeight;
+        float pointHeightMultiplier;
         float closenessX;  //How close to edge X as a number between 0 and 1 
         float closenessY;
         float closeness;
 
-        // For loop to normalise map
+        // Loop through height and width to calculate the edges of the terrains, to flatten edges
+        // This is done to reduce the gaps between the terrains so the stitching is so drastic
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
             {
-                pointheight = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, map[x, y]);
+                pointHeight = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, map[x, y]);
 
                 if ((float)x / width < 0.5f)
                 {
@@ -374,16 +1049,16 @@ public class MapGenerator : MonoBehaviour
 
                 if (closeness < 0.1)
                 {
-                    pointheightmultiplier = 0.5f + (closeness * 5f);
+                    pointHeightMultiplier = 0.5f + (closeness * 5f);
                 }
                 else
                 {
-                    pointheightmultiplier = 1;
+                    pointHeightMultiplier = 1;
                 }
 
                 //map[x, y] = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, map[x, y]) ;
                     
-                map[x, y] = (pointheight * pointheightmultiplier) + (1 - pointheightmultiplier)/2;
+                map[x, y] = (pointHeight * pointHeightMultiplier) + (1 - pointHeightMultiplier)/2;
             }
         }
 
