@@ -46,11 +46,11 @@ public class MainController : MonoBehaviour
         }
 
         // Positions in getheight are not reversed as looking at camera but need to be scaled as x and z positions are on a different scale to the height map
-        float terrheight = _terrain.terrainData.GetHeight((int)(_camera.transform.position.x - _terrain.GetPosition().x) * _terrain.terrainData.heightmapWidth / (int)_terrain.terrainData.size.x,
+        float terrainHeight = _terrain.terrainData.GetHeight((int)(_camera.transform.position.x - _terrain.GetPosition().x) * _terrain.terrainData.heightmapWidth / (int)_terrain.terrainData.size.x,
                                                           (int)(_camera.transform.position.z - _terrain.GetPosition().z) * _terrain.terrainData.heightmapHeight / (int)_terrain.terrainData.size.z);
 
         // Check camera height
-        if (_camera.transform.position.y < terrheight + minCameraHeight)
+        if (_camera.transform.position.y < terrainHeight + minCameraHeight)
         {
             //Move up
             ChangeCameraHeight();
@@ -66,7 +66,7 @@ public class MainController : MonoBehaviour
     {
         // positions in getheight are not reversed as looking at camera but need to be scaled as x and z positions are on a different scale to the height map
         float terrainHeight = _terrain.terrainData.GetHeight((int)(_camera.transform.position.x - _terrain.GetPosition().x) * _terrain.terrainData.heightmapWidth / (int)_terrain.terrainData.size.x,
-                                                          (int)(_camera.transform.position.z - _terrain.GetPosition().z) * _terrain.terrainData.heightmapHeight / (int)_terrain.terrainData.size.z);
+                                                             (int)(_camera.transform.position.z - _terrain.GetPosition().z) * _terrain.terrainData.heightmapHeight / (int)_terrain.terrainData.size.z);
         // Move camera's relative position
         float cameraNewY = terrainHeight + minCameraHeight - _player.transform.position.y;
 
@@ -106,7 +106,7 @@ public class MainController : MonoBehaviour
         Terrain[] _terrains = Terrain.activeTerrains;
         //Get the closest one to the player
         Vector3 center = new Vector3(_terrains[0].transform.position.x + _terrains[0].terrainData.size.x / 2, playerPos.y, _terrains[0].transform.position.z + _terrains[0].terrainData.size.z / 2);
-        float lowDist = (center - playerPos).sqrMagnitude;
+        float lowestDistance = (center - playerPos).sqrMagnitude;
         int terrainIndex = 0;
 
         for (int i = 0; i < _terrains.Length; i++)
@@ -115,9 +115,9 @@ public class MainController : MonoBehaviour
 
             //Find the distance and check if it is lower than the last one then store it
             float dist = (center - playerPos).sqrMagnitude;
-            if (dist < lowDist)
+            if (dist < lowestDistance)
             {
-                lowDist = dist;
+                lowestDistance = dist;
                 terrainIndex = i;
             }
         }
