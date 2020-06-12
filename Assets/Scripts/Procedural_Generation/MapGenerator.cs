@@ -10,9 +10,9 @@ public class MapGenerator : MonoBehaviour
 
     // Class references
     public NoiseValues _noiseValues;
-    public TexturingTerrain _texturingTerrain;
+    public TextureGenerator _textureGenerator;
     public MainController _mainController;
-    public TreeGeneration treeGeneration;
+    public TerrainAssetGenerator _terrainAssetGenerator;
 
     // Float arrays for heightmap and splat data
     private float[,] heightmapData;
@@ -58,8 +58,6 @@ public class MapGenerator : MonoBehaviour
 
     void Start()
     {
-        
-
         // Calculate center of terrain
         terrainCentre = new Vector2(_terrain.terrainData.size.x / 2, _terrain.terrainData.size.z / 2);
 
@@ -71,7 +69,7 @@ public class MapGenerator : MonoBehaviour
             // Set heights for initial terrain
             _terrain.terrainData.SetHeights(0, 0, heightmapData);
             // Apply SplatMap to terrain (textures)
-            _texturingTerrain.SplatMap(_terrain);
+            _textureGenerator.SplatMap(_terrain);
 
             terrainHeights.Add(heightmapData);
             terrainSplatmap.Add(_terrain.terrainData.GetAlphamaps(0, 0, _terrain.terrainData.alphamapWidth, _terrain.terrainData.alphamapHeight));
@@ -80,9 +78,14 @@ public class MapGenerator : MonoBehaviour
         // Creates default terrain data to equal current terrain data
         defaultTD = _terrain.terrainData;
 
+        // Call create trees function to generate trees across the 9 original generated terrains
+        _terrainAssetGenerator.CreateTrees(_terrain);
+        
+        // Call create water function to generate water across the 9 original generated terrains
+        _terrainAssetGenerator.CreateWater(_terrain);
 
-        treeGeneration.GetTrees(_terrain);
-
+        // Call create grass function to generate grass across the 9 original generated terrains
+        _terrainAssetGenerator.CreateGrass(_terrain);
 
         // Loop through CreateEndlessTerrain 8 times to create initial 3x3 terrain
         // CreateEndlessTerrain is called in MainController to create new terrain, this will however, loop through ensuring the player
@@ -330,7 +333,10 @@ public class MapGenerator : MonoBehaviour
                     // Add the new terrain to the existing terrain neighbours
        //             _terrains[foundTerrainID].SetNeighbors(_nextTerrain, _terrains[foundTerrainID].topNeighbor, _terrains[foundTerrainID].rightNeighbor, _terrains[foundTerrainID].bottomNeighbor);
                 }
-                treeGeneration.GetTrees(_nextTerrain);
+                _terrainAssetGenerator.CreateTrees(_nextTerrain);
+                // Call create water function to generate the water across new created terrains
+                _terrainAssetGenerator.CreateWater(_nextTerrain);
+
                 terrainBuilt = true;
             }
         }
@@ -541,7 +547,7 @@ public class MapGenerator : MonoBehaviour
 
         // Update part of splatmap to reflect the change in heights
         //_texturingTerrain.PartialSplatMap(terrainData, 0, 0, (int)(terrainData.alphamapWidth * 0.1f), terrainData.alphamapHeight);
-        _texturingTerrain.SplatMap(terrain);
+        _textureGenerator.SplatMap(terrain);
         // Set splat width and height equal to alphamap values
         int splatWidth = terrainData.alphamapWidth;
         int splatHeight = terrainData.alphamapHeight;
@@ -732,7 +738,7 @@ public class MapGenerator : MonoBehaviour
 
         // Update part of splatmap to reflect the change in heights from above code
         // _texturingTerrain.PartialSplatMap(terrainData,  terrainData.alphamapHeight - 1 - (int)(terrainData.alphamapHeight * 0.1f), 0, (int)(terrainData.alphamapWidth * 0.1f), terrainData.alphamapHeight);
-        _texturingTerrain.SplatMap(terrain);
+        _textureGenerator.SplatMap(terrain);
         // Set splat width and height equal to alphamap values
         int splatWidth = terrainData.alphamapWidth;
         int splatHeight = terrainData.alphamapHeight;
@@ -888,7 +894,7 @@ public class MapGenerator : MonoBehaviour
 
         // Update part of splatmap to reflect the change in heights
         //_texturingTerrain.PartialSplatMap(terrainData, 0, terrainData.alphamapWidth - 1 - (int)(terrainData.alphamapWidth * 0.1f),  terrainData.alphamapHeight, (int)(terrainData.alphamapWidth * 0.1f) );
-        _texturingTerrain.SplatMap(terrain);
+        _textureGenerator.SplatMap(terrain);
 
         // Set splat width and height equal to alphamap values
         int splatWidth = terrainData.alphamapWidth;
@@ -1097,7 +1103,7 @@ public class MapGenerator : MonoBehaviour
 
         // Update part of splatmap to reflect the change in heights
         //_texturingTerrain.PartialSplatMap(terrainData, 0, 0, terrainData.alphamapHeight, (int)(terrainData.alphamapWidth * 0.1f));
-        _texturingTerrain.SplatMap(terrain);
+        _textureGenerator.SplatMap(terrain);
         // Set splat width and height equal to alphamap values
         int splatWidth = terrainData.alphamapWidth;
         int splatHeight = terrainData.alphamapHeight;

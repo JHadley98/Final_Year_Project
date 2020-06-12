@@ -222,9 +222,9 @@ MonoBehaviour:
     persistance: 0.5
     lacunarity: 2
     offset: {x: 0, y: 0}
-  _texturingTerrain: {fileID: 662369452}
+  _textureGenerator: {fileID: 662369452}
   _mainController: {fileID: 1943224981}
-  treeGeneration: {fileID: 662369453}
+  _terrainAssetGenerator: {fileID: 662369453}
   numOfTerrains: 4
 --- !u!114 &662369452
 MonoBehaviour:
@@ -266,9 +266,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f0342c7101006f418684d3a1dbcdc34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  broadleafTree: {fileID: 100000, guid: c91c1eb85782d5748ace27eb4d7415bb, type: 3}
-  coniferTree: {fileID: 100016, guid: 469edab27ab6d004d84af2c4a851bd7f, type: 3}
-  palmTree: {fileID: 100004, guid: d027af1092f6b434090f040565e7e656, type: 3}
+  water: {fileID: 100000, guid: 780611a67e8e941a2b3aa96e5915a793, type: 3}
+  terrainPrefab: {fileID: 0}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -379,7 +378,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 408730, guid: 7737647c22c1fc64a88d5cd030c352ce, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 31.7
+      value: 65
       objectReference: {fileID: 0}
     - target: {fileID: 408730, guid: 7737647c22c1fc64a88d5cd030c352ce, type: 3}
       propertyPath: m_LocalPosition.y
@@ -387,7 +386,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 408730, guid: 7737647c22c1fc64a88d5cd030c352ce, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 5
+      value: 115
       objectReference: {fileID: 0}
     - target: {fileID: 408730, guid: 7737647c22c1fc64a88d5cd030c352ce, type: 3}
       propertyPath: m_LocalRotation.x

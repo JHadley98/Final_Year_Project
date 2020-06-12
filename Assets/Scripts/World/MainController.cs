@@ -68,7 +68,17 @@ public class MainController : MonoBehaviour
         float terrainHeight = _terrain.terrainData.GetHeight((int)(_camera.transform.position.x - _terrain.GetPosition().x) * _terrain.terrainData.heightmapWidth / (int)_terrain.terrainData.size.x,
                                                              (int)(_camera.transform.position.z - _terrain.GetPosition().z) * _terrain.terrainData.heightmapHeight / (int)_terrain.terrainData.size.z);
         // Move camera's relative position
-        float cameraNewY = terrainHeight + minCameraHeight - _player.transform.position.y;
+        float cameraNewY;
+        //dont let camera go below water
+        if(terrainHeight < 6)
+        {
+            cameraNewY = 7 + minCameraHeight - _player.transform.position.y;
+        }
+        else
+        {
+            cameraNewY  = terrainHeight + minCameraHeight - _player.transform.position.y;
+        }
+            
 
         // If camera position is lower than player then keep camera position in line with player
         if (cameraNewY < startCameraHeight)
