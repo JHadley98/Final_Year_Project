@@ -241,7 +241,7 @@ MonoBehaviour:
   splatMap:
   - textureIndex: 0
     startingHeight: 0
-    overlap: 1
+    overlap: 2
   - textureIndex: 1
     startingHeight: 10
     overlap: 1
@@ -267,7 +267,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   water: {fileID: 100000, guid: 780611a67e8e941a2b3aa96e5915a793, type: 3}
-  terrainPrefab: {fileID: 0}
+  grassSprite: {fileID: 2800000, guid: 2c528fec5d95e4ac28cf46399b887662, type: 3}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0

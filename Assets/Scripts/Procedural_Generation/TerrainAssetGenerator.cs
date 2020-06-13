@@ -14,71 +14,74 @@ public class TerrainAssetGenerator : MonoBehaviour
     private float terrainHeight;
     private float treeDensity;
     private float treeRandomPosition;
-    private int detailResolution;
-    private int resolutionPerPatch = 8;
-    
+
     public GameObject water;
-    GameObject grass;
-    private Texture2D grassSprite;
-    public GameObject terrainPrefab;
+    public Texture2D grassSprite;
 
     public void CreateWater(Terrain _terrain)
     {
         // Instantiate the water object, setting it's location to equal the terrains x, and z size, while settings it Y to equal 6 for the height of the water object to appear in the game
-        Instantiate(water, new Vector3(_terrain.terrainData.size.x / 2 +_terrain.transform.position.x, 6, _terrain.terrainData.size.z / 2 +_terrain.transform.position.z), Quaternion.identity);
+        Instantiate(water, new Vector3(_terrain.terrainData.size.x / 2 + _terrain.transform.position.x, 6, _terrain.terrainData.size.z / 2 + _terrain.transform.position.z), Quaternion.identity);
     }
 
     public void CreateGrass(Terrain _terrain)
     {
-        
-        //GameObject grass = (GameObject)Instantiate(terrainPrefab);
-        //_terrain = grass.GetComponent<Terrain>();
-
         // Dry colour = R: 205, G: 188, B: 16, A: 255, convert to decimal divide by 255 as ranges needs to be 0 - 1 instead of range 0 - 255
         // Dry colour in decimals then equals new colour (R: 0.8f, G: 0.73f, B: 0.06, A: 1)
         // Healthy colour = R: 67, G: 249, B: 42, A: 255, convert to decimal divide by 255 as ranges needs to be 0 - 1 instead of range 0 - 255
-        // Healthy colour in decimal then equals new colour (R: 0.26, B:
-        DetailPrototype detailPrototype = GrassPrototypeForTexture(grassSprite, 2f, new Color(0.8f, 0.73f, 0.06f, 1), new Color(0.67f, 2.49f, 0.42f, 1f));
+        // Healthy colour in decimal then equals new colour (R: 0.26, G:0.97, 0.16, A: 1)
+        DetailPrototype detailPrototype = GrassPrototypeForTexture(grassSprite, new Color(0.8f, 0.73f, 0.06f, 1), new Color(0.26f, 0.97f, 0.16f, 1f));
 
-        
+        _terrain.terrainData.detailPrototypes = new DetailPrototype[1] { detailPrototype }; // Create new detail prototype passing in the GrassProtoTypeTexture
+        _terrain.terrainData.wavingGrassSpeed = 0.5f;                                       // Set waving grass speed
+        _terrain.terrainData.wavingGrassAmount = 0.5f;                                      // Set waving grass amount
+        _terrain.terrainData.wavingGrassStrength = 0.5f;                                    // Set waving grass strength
+        _terrain.terrainData.wavingGrassTint = new Color(0.45f, 0.45f, 0.45f, 1);              // Set waving grass tint
 
-        //TerrainData terrainData = new UnityEngine.TerrainData();
-        //_terrain.terrainData = terrainData;
-
-        //_terrain.terrainData.detailPrototypes = new DetailPrototype[1] { detailPrototype };
-        _terrain.terrainData.wavingGrassSpeed = 0.5f;
-        _terrain.terrainData.wavingGrassAmount = 0.5f;
-        _terrain.terrainData.wavingGrassStrength = 0.5f;
-        _terrain.terrainData.wavingGrassTint = new Color(.45f, .45f, .45f, 1);
-
-        _terrain.GetComponent<TerrainCollider>().terrainData = _terrain.terrainData;
-
-        _terrain.terrainData.SetDetailResolution(64, 8);
-        int size = 64;
-        int[,] details = new int[size, size];
-        for (int x = 0; x < size; x++)
+        // Set details to equal the terrain detail width and hieght
+        int[,] details = new int[_terrain.terrainData.detailWidth, _terrain.terrainData.detailHeight];
+        // Loop the through detail width and height
+        for (int x = 0; x < _terrain.terrainData.detailWidth; x++)
         {
-            for (int y = 0; y < size; y++)
+            for (int z = 0; z < _terrain.terrainData.detailHeight; z++)
             {
-                details[x, y] = 15;
+                // Set terrain height
+                terrainHeight = _terrain.terrainData.GetHeight((int)(z * _terrain.terrainData.heightmapHeight / _terrain.terrainData.detailHeight),
+                                                               (int)(x * _terrain.terrainData.heightmapWidth / _terrain.terrainData.detailWidth));
+
+                // Set terrain height values between a set range in which the grass will be generated onto
+                if (terrainHeight > 8 && terrainHeight < 17)
+                {
+                    // Set detail frequency for the grass
+                    details[x, z] = 256;
+                }
+                // Else don't paint grass on to terrain
+                else
+                {
+                    details[x, z] = 0;
+                }
             }
         }
 
-        _terrain.terrainData.SetDetailLayer(0, 0, 0, details);
+        _terrain.terrainData.SetDetailLayer(0, 0, 0, details);  // Set detail layer
+        _terrain.terrainData.RefreshPrototypes();               // Refresh all available prototypes in the terrain object
     }
 
-    public static DetailPrototype GrassPrototypeForTexture(Texture2D texture2D, float scale, Color dryColour, Color healthyColour)
+    /// <summary>
+    /// Detail prototype function used to set the values for the grass to be created
+    /// </summary>
+    public static DetailPrototype GrassPrototypeForTexture(Texture2D texture2D, Color dryColour, Color healthyColour)
     {
         DetailPrototype detail = new DetailPrototype();
         detail.usePrototypeMesh = false;
         detail.prototypeTexture = texture2D;
         detail.dryColor = dryColour;
         detail.healthyColor = healthyColour;
-        detail.noiseSpread = 5f;
-        detail.minWidth = 1 * scale;
-        detail.minWidth = 2 * scale;
-        detail.minHeight = .3f * scale;
-        detail.maxHeight = .5f * scale;
+        detail.noiseSpread = 5.0f;
+        detail.minWidth = 1;
+        detail.minWidth = 2;
+        detail.minHeight = 0.25f;
+        detail.maxHeight = 0.5f;
         detail.renderMode = DetailRenderMode.GrassBillboard;
         return detail;
     }
@@ -92,6 +95,7 @@ public class TerrainAssetGenerator : MonoBehaviour
         GameObject _collider;
         Vector3 colliderPos;
 
+        bool treeMade;
         // Loop through the terrain size on both the x and z axis
         for (float x = 0; x < _terrain.terrainData.size.x; x++)
         {
@@ -99,45 +103,56 @@ public class TerrainAssetGenerator : MonoBehaviour
             {
                 terrainHeight = Mathf.PerlinNoise(x * 0.05f, z * 0.05f);
                 int randomGrouping = Mathf.FloorToInt(Mathf.PerlinNoise(x * 0.05f, z * 0.05f) * 1000);
-                treeDensity = UnityEngine.Random.Range(0, 100);
+                treeDensity = Random.Range(0, 100);
 
-                if (randomGrouping < 200 && treeDensity < 25)
+                // Set terrain height
+                terrainHeight = _terrain.terrainData.GetHeight((int)(x * _terrain.terrainData.heightmapWidth / _terrain.terrainData.size.x),
+                                                               (int)(z * _terrain.terrainData.heightmapHeight / _terrain.terrainData.size.z));
+
+                // If terrain is greater than 5 or less than 20 then place tree between them heights
+                if (randomGrouping < 200 && terrainHeight >= 6 && terrainHeight <= 19)
                 {
-                    // Set terrain height
-                    terrainHeight = _terrain.terrainData.GetHeight((int)(x * _terrain.terrainData.heightmapWidth / _terrain.terrainData.size.x),
-                                                                   (int)(z * _terrain.terrainData.heightmapHeight / _terrain.terrainData.size.z));
-                    
-                    // If terrain is greater than 5 or less than 20 then place tree between them heights
-                    if (terrainHeight > 5 && terrainHeight < 20)
-                    {
-                        // Create trees
-                        treeInstance = new TreeInstance();
+                    treeMade = false;
 
+                    // Set terrain height and tree density, if a tree is between them heights and has that density create 1 of 3 tree types based on terrain height and tree density
+                    if (terrainHeight <= 9 && treeDensity <= 60)
+                    {
+                        treeInstance = new TreeInstance();  // Create trees
+                        treeInstance.prototypeIndex = 0;    // Create palm trees
+                        treeInstance.widthScale = 0.7f;
+                        treeInstance.heightScale = 0.7f;
+                        treeMade = true;
+                    }
+                    else if (terrainHeight <= 14 && treeDensity <= 30)
+                    {
+                        treeInstance = new TreeInstance();  // Create trees
+                        treeInstance.prototypeIndex = 1;    // Create broad leaf trees trees
+                        treeInstance.widthScale = 0.3f;
+                        treeInstance.heightScale = 0.3f;
+                        treeMade = true;
+                    }
+                    else if (terrainHeight >= 13 && treeDensity >= 30 && treeDensity <= 60)
+                    {
+                        treeInstance = new TreeInstance();  // Create trees
+                        treeInstance.prototypeIndex = 2;    // Create conifer trees
+                        treeInstance.widthScale = 0.3f;
+                        treeInstance.heightScale = 0.3f;
+                        treeMade = true;
+                    }
+
+                    // If tree made euqals true, set tree positions, scale and colliders
+                    if (treeMade == true)
+                    {
                         // Create random position for trees to be generated
-                        treeRandomPosition = UnityEngine.Random.value;
-                        
+                        treeRandomPosition = Random.value;
+
                         // Set tree position to be always be on terrain
                         treeInstance.position = new Vector3((x + treeRandomPosition) / _terrain.terrainData.size.x, 0, (z + treeRandomPosition) / _terrain.terrainData.size.z);
 
-                        // If terrain height is less than 8 and has a tree density less than 50 create tree prototype index 0 (Palm tree)
-                        if (terrainHeight < 8 && treeDensity < 50)
-                        {
-                            treeInstance.prototypeIndex = 0;
-                        }
-                        // Else if terrain height is less than 15 and has a tree density less than 10 create tree prototype index 1 (Broad tree) between heights 8 and 15
-                        else if (terrainHeight < 15 && treeDensity < 10)
-                        {
-                            treeInstance.prototypeIndex = 1;
-                        }
-                        // Else generate tree index 2 (Conifer tree) between heights 15 and 20
-                        else
-                        {
-                            treeInstance.prototypeIndex = 2;
-                        }
 
                         // Set tree scale for width and height
-                        treeInstance.widthScale = 0.3f;
-                        treeInstance.heightScale = 0.3f;
+                        //treeInstance.widthScale = 0.3f;
+                        //treeInstance.heightScale = 0.3f;
 
                         // Add tree instance to terrain
                         _terrain.AddTreeInstance(treeInstance);
@@ -145,7 +160,7 @@ public class TerrainAssetGenerator : MonoBehaviour
                         _terrain.Flush();
 
                         // Set collider position to be equal to 
-                        colliderPos = new Vector3((x + treeRandomPosition) + _terrain.transform.position.x, _terrain.SampleHeight(new Vector3(x, 0, z)), (z + treeRandomPosition) + _terrain.transform.position.z);
+                        colliderPos = new Vector3((x + treeRandomPosition) + _terrain.transform.position.x, _terrain.SampleHeight(new Vector3(x + _terrain.transform.position.x, 0, z + _terrain.transform.position.z)), (z + treeRandomPosition) + _terrain.transform.position.z);
                         _collider = new GameObject();
                         _collider.gameObject.AddComponent<CapsuleCollider>();
                         _collider.transform.position = colliderPos;                 // Set the collider position to be equal to the collider position placing the capsule collider at the trees position
@@ -157,4 +172,3 @@ public class TerrainAssetGenerator : MonoBehaviour
         }
     }
 }
- 

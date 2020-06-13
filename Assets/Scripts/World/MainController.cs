@@ -70,15 +70,15 @@ public class MainController : MonoBehaviour
         // Move camera's relative position
         float cameraNewY;
         //dont let camera go below water
-        if(terrainHeight < 6)
+        if (terrainHeight < 7)
         {
             cameraNewY = 7 + minCameraHeight - _player.transform.position.y;
         }
         else
         {
-            cameraNewY  = terrainHeight + minCameraHeight - _player.transform.position.y;
+            cameraNewY = terrainHeight + minCameraHeight - _player.transform.position.y;
         }
-            
+
 
         // If camera position is lower than player then keep camera position in line with player
         if (cameraNewY < startCameraHeight)
@@ -95,7 +95,7 @@ public class MainController : MonoBehaviour
         {
             cameraNewY = _camera.transform.localPosition.y - 0.01f;
         }
-        
+
         _camera.transform.localPosition = new Vector3(_camera.transform.localPosition.x, cameraNewY, _camera.transform.localPosition.z);
 
         //Move camera's angle

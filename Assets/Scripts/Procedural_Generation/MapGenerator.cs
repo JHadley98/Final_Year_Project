@@ -54,7 +54,7 @@ public class MapGenerator : MonoBehaviour
     private bool terrainTwoFound;
     private float distToJoin;
 
-    
+
 
     void Start()
     {
@@ -80,7 +80,7 @@ public class MapGenerator : MonoBehaviour
 
         // Call create trees function to generate trees across the 9 original generated terrains
         _terrainAssetGenerator.CreateTrees(_terrain);
-        
+
         // Call create water function to generate water across the 9 original generated terrains
         _terrainAssetGenerator.CreateWater(_terrain);
 
@@ -128,7 +128,7 @@ public class MapGenerator : MonoBehaviour
         neighbouringTerrain[3] = new Vector3(defaultTD.size.x, 0, 0); // Right terrain
 
         heightmapData = terrainHeights[terrainNumber];
-        
+
         splatData = terrainSplatmap[terrainNumber];
 
         // Number of terrains is the total number of terrains
@@ -184,7 +184,7 @@ public class MapGenerator : MonoBehaviour
                 _nextTerrain.terrainData.SetAlphamaps(0, 0, splatData);
 
                 // Check for neighbours
-                
+
 
                 //Now check left join 
                 terrainFound = false;
@@ -323,20 +323,26 @@ public class MapGenerator : MonoBehaviour
                     }
                     StitchToRight(_nextTerrain, _terrains[foundTerrainID], terrainOneFound, terrainTwoFound);
 
-                    if(terrainOneFound == true)
+                    if (terrainOneFound == true)
                     {
                         StitchBottomRight(_nextTerrain);
                     }
 
                     // Add neighbour to set neighbours
-         //           _nextTerrain.SetNeighbors(_nextTerrain.leftNeighbor, _nextTerrain.topNeighbor, _terrains[foundTerrainID], _nextTerrain.bottomNeighbor);
+                    //           _nextTerrain.SetNeighbors(_nextTerrain.leftNeighbor, _nextTerrain.topNeighbor, _terrains[foundTerrainID], _nextTerrain.bottomNeighbor);
                     // Add the new terrain to the existing terrain neighbours
-       //             _terrains[foundTerrainID].SetNeighbors(_nextTerrain, _terrains[foundTerrainID].topNeighbor, _terrains[foundTerrainID].rightNeighbor, _terrains[foundTerrainID].bottomNeighbor);
+                    //             _terrains[foundTerrainID].SetNeighbors(_nextTerrain, _terrains[foundTerrainID].topNeighbor, _terrains[foundTerrainID].rightNeighbor, _terrains[foundTerrainID].bottomNeighbor);
                 }
+                
+                // Create tress across endless terrain
                 _terrainAssetGenerator.CreateTrees(_nextTerrain);
-                // Call create water function to generate the water across new created terrains
+                
+                // Create water across endless terrain
                 _terrainAssetGenerator.CreateWater(_nextTerrain);
-
+                
+                // Create grass across endless terrain
+                _terrainAssetGenerator.CreateGrass(_terrain);
+                
                 terrainBuilt = true;
             }
         }
@@ -347,12 +353,12 @@ public class MapGenerator : MonoBehaviour
         }
         //treeGeneration.GetTrees(_nextTerrain);
     }
-   
+
     public void StitchBottomRight(Terrain terrain)
     {
         TerrainData terrainData = terrain.terrainData;
         // Get current values of bottom 10% of heights to be smoothed
-        int xSize = (int)(terrainData.heightmapWidth * 0.1f)*2 ;               // 10% of Width
+        int xSize = (int)(terrainData.heightmapWidth * 0.1f) * 2;               // 10% of Width
         int ySize = (int)(terrainData.heightmapHeight * 0.1f);              // 10% of height
         float[,] startValues = terrainData.GetHeights(terrainData.heightmapWidth - xSize, 0, xSize, ySize);  // Put current heights into array (x and y goes in reverse)
         float[,] endValues = new float[ySize, xSize];                        // Create array for new heights
@@ -375,7 +381,7 @@ public class MapGenerator : MonoBehaviour
 
         for (int x = 0; x < xSize; x++)
         {
-            
+
 
             for (int y = 0; y < ySize; y++)
             {
@@ -388,17 +394,17 @@ public class MapGenerator : MonoBehaviour
                 distToX2 = ySize - 1 - y;
                 influenceX1 = 1f - Mathf.InverseLerp(0, (ySize - 1) / 2 - 5, distToX1);
                 influenceX2 = 1f - Mathf.InverseLerp(0, (ySize - 1) / 2 - 5, distToX2);
-                
+
 
                 distToY1 = x;
                 distToY2 = xSize - 1 - x;
-                influenceY1 = 1f - Mathf.InverseLerp(0, (xSize - 1)/2 -5, distToY1);
-                influenceY2 = 1f - Mathf.InverseLerp(0, (xSize - 1)/2 -5, distToY2);
-              
+                influenceY1 = 1f - Mathf.InverseLerp(0, (xSize - 1) / 2 - 5, distToY1);
+                influenceY2 = 1f - Mathf.InverseLerp(0, (xSize - 1) / 2 - 5, distToY2);
+
 
                 //influenceMax = Mathf.Max(influenceX1, influenceX2, influenceY1, influenceY2);
                 influenceSum = influenceX1 + influenceX2 + influenceY1 + influenceY2;
-               // influenceTotalHeight = influenceX1 * startValues[y,0] + influenceX2 * startValues[y,xSize-1] + influenceY1 * startValues[0,x] +influenceY2 * startValues[ySize-1,x];
+                // influenceTotalHeight = influenceX1 * startValues[y,0] + influenceX2 * startValues[y,xSize-1] + influenceY1 * startValues[0,x] +influenceY2 * startValues[ySize-1,x];
 
                 avX1 = (influenceX1 * startValues[0, x]) + ((1 - influenceX1) * startValues[y, x]);
                 avX2 = (influenceX2 * startValues[ySize - 1, x]) + ((1 - influenceX2) * startValues[y, x]);
@@ -407,7 +413,7 @@ public class MapGenerator : MonoBehaviour
 
 
 
-                if (x == 0 || y == 0 || x == xSize - 1 ||y == ySize - 1)
+                if (x == 0 || y == 0 || x == xSize - 1 || y == ySize - 1)
                 {
                     endValues[y, x] = startValues[y, x];
                 }
@@ -418,16 +424,16 @@ public class MapGenerator : MonoBehaviour
                 else
                 {
                     endValues[y, x] = (avX1 * influenceX1 / influenceSum) + (avX2 * influenceX2 / influenceSum) + (avY1 * influenceY1 / influenceSum) + (avY2 * influenceY2 / influenceSum);
-                  //  endValues[y, x] = 1.0f;
+                    //  endValues[y, x] = 1.0f;
                 }
-                
+
 
             }
         }
-        terrainData.SetHeights( terrainData.heightmapWidth - xSize,0, endValues);
+        terrainData.SetHeights(terrainData.heightmapWidth - xSize, 0, endValues);
 
     }
-   
+
     public void StitchToBottom(Terrain terrain, Terrain bottomTerrain, bool leftTerrainFound, bool rightTerrainFound)
     {
         /// Step 1:
@@ -454,7 +460,7 @@ public class MapGenerator : MonoBehaviour
         int xSize = terrainData.heightmapWidth;                             // Full width of terrain
         int ySize = (int)(terrainData.heightmapHeight * 0.1f);              // 10% of height
         float[,] startValues = terrainData.GetHeights(0, 0, xSize, ySize);  // Put current heights into array (x and y goes in reverse)
-        float[,] endValues = new float[ySize,xSize];                        // Create array for new heights
+        float[,] endValues = new float[ySize, xSize];                        // Create array for new heights
 
         // Smooth out terrain based on a propotion of original terrain and the edge with the neighbour
         float propotionOfOriginal;                                          // Propotion of original height to be used in the new height
@@ -470,24 +476,24 @@ public class MapGenerator : MonoBehaviour
         for (int x = 0; x < xSize; x++)
         {
             // Difference in height between start and end
-            heightDiff = Mathf.Abs(startValues[0, x] - startValues[ySize - 1, x]);          
-            
+            heightDiff = Mathf.Abs(startValues[0, x] - startValues[ySize - 1, x]);
+
             // Variation value is based on height difference, big height differences give big values, so blending is over a bigger distance
             variationValue = Mathf.InverseLerp(0, 0.6f, heightDiff);
-            
+
             // Blend limit is 75% to 100% of blend region (ySize - 1, needs -1 as counting starts at 0)
-            blendLimit = (0.75f * (ySize - 1)) + (0.25f * (ySize - 1) * variationValue);  
+            blendLimit = (0.75f * (ySize - 1)) + (0.25f * (ySize - 1) * variationValue);
 
             for (int y = 0; y < ySize; y++)
             {
-                               
+
                 propotionOfOriginal = Mathf.InverseLerp(0, blendLimit, y);  // InverseLerp gives a decimal 0 to 1 of where Y is from 0 to blend limit
-                
+
                 if (propotionOfOriginal > 1)                                // Propotion of the original cannot be more than 1
                 {
                     propotionOfOriginal = 1;
                 }
-                
+
                 propotionOfTarget = 1 - propotionOfOriginal;                // Propotion of target and original always add up to 1
 
                 // Workout new height
@@ -500,10 +506,11 @@ public class MapGenerator : MonoBehaviour
                 {
                     endValues[y, x] = startValues[y, x];
                 }
-                else {
+                else
+                {
                     endValues[y, x] = (propotionOfOriginal * startValues[y, x]) + (propotionOfTarget * startValues[0, x]);
                 }
-                
+
 
             }
         }
@@ -538,7 +545,7 @@ public class MapGenerator : MonoBehaviour
         /// Blend heights 2% either side of join with a target that is an average of the heights from both terrains and the seam height
         /// This is to avoid sudden changes in direction
         /// 
-        
+
 
         ///
         /// Step 4:
@@ -551,10 +558,10 @@ public class MapGenerator : MonoBehaviour
         // Set splat width and height equal to alphamap values
         int splatWidth = terrainData.alphamapWidth;
         int splatHeight = terrainData.alphamapHeight;
-        
+
         float[,,] splatMap1 = terrain.terrainData.GetAlphamaps(0, 0, splatWidth, splatHeight);          // Put the current terrains splatmap width and height into an array
         float[,,] splatMap2 = bottomTerrain.terrainData.GetAlphamaps(0, 0, splatWidth, splatHeight);    // Put the bottom terrains splatmap width and height into an array
-        
+
         int numOfSplats = terrain.terrainData.terrainLayers.Length;                                     // Set number of splats available equal to the terrainlayers length (6)
         int ySplatMapPart = (int)(splatHeight * 0.02f);                                                 // Blend the splatmaps from both terrains at 0.02 from join
 
@@ -568,11 +575,11 @@ public class MapGenerator : MonoBehaviour
                 for (int j = 0; j < numOfSplats; j++)
                 {
                     // Update splatmap based on propotion of original side and other side of seam
-                    splatMap1[y, x, j] = propotionOfOriginal * splatMap1[(int)(propotionOfOriginal * ySplatMapPart), x, j] + 
+                    splatMap1[y, x, j] = propotionOfOriginal * splatMap1[(int)(propotionOfOriginal * ySplatMapPart), x, j] +
                                          propotionOfTarget * splatMap2[splatHeight - 1 - (int)(propotionOfTarget * ySplatMapPart), x, j];
 
                     // Repeat for splatmap on other side of seam
-                    splatMap2[splatHeight - 1 - y, x, j] = propotionOfTarget * splatMap1[(int)(propotionOfTarget * ySplatMapPart), x, j] + 
+                    splatMap2[splatHeight - 1 - y, x, j] = propotionOfTarget * splatMap1[(int)(propotionOfTarget * ySplatMapPart), x, j] +
                                                            propotionOfOriginal * splatMap2[splatHeight - 1 - (int)(propotionOfOriginal * ySplatMapPart), x, j];
                 }
             }
@@ -582,7 +589,7 @@ public class MapGenerator : MonoBehaviour
         // Apply bottom terrain splatmap
         bottomTerrain.terrainData.SetAlphamaps(0, 0, splatMap2);
     }
-    
+
     public void StitchToTop(Terrain terrain, Terrain topTerrain)
     {
         // Smooth out terrain based on a propotion of original terrain and the edge with the neighbour
@@ -613,14 +620,14 @@ public class MapGenerator : MonoBehaviour
         /// Blend 10% of heights in new terrain to the height of the first row of the new terrain
         /// First row of the new terrain is the same as bottom terrain
         /// 
-        
+
         // Get current values of bottom 10% of heights to be smoothed
         int xSize = terrainData.heightmapWidth;                             // Full width of terrain
         int ySize = (int)(terrainData.heightmapHeight * 0.1f);              // 10% of height
         float[,] startValues = terrainData.GetHeights(0, terrainData.heightmapHeight - ySize, xSize, ySize);  // Put current heights into array (x and y goes in reverse)
         float[,] endValues = new float[ySize, xSize];                       // Create array for new heights
 
-        
+
 
         // Loop through all the X's and Y's in the startValues array to workout the new values
         for (int x = 0; x < xSize; x++)
@@ -641,7 +648,7 @@ public class MapGenerator : MonoBehaviour
 
             for (int y = 0; y < ySize; y++)
             {
-                propotionOfOriginal =  Mathf.InverseLerp(0, blendLimit, ySize - 1 - y); // InverseLerp gives a decimal 0 to 1 of where Y is from 0 to blend limit, ysize-y used as y=0 is 100% original
+                propotionOfOriginal = Mathf.InverseLerp(0, blendLimit, ySize - 1 - y); // InverseLerp gives a decimal 0 to 1 of where Y is from 0 to blend limit, ysize-y used as y=0 is 100% original
 
                 if (propotionOfOriginal > 1)                                            // Propotion of the original cannot be more than 1
                 {
@@ -657,13 +664,13 @@ public class MapGenerator : MonoBehaviour
 
         // Apply new heights to terrain
         terrainData.SetHeights(0, terrainData.heightmapHeight - ySize, endValues);
-        
+
         /// 
         /// Step 3:
         /// Blend heights 2% either side of join with a target that is an average of the heights from both terrains and the seam height
         /// This is to avoid sudden changes in direction
         /// 
-        
+
         float[,] startStitchValues1 = terrainData.GetHeights(0, terrainData.heightmapHeight - 2, xSize, 2);   // Put current stitch values to into an array (terrain)
         float[,] endStitchValues1 = new float[1, xSize];                        // Create array to store new heights for the end of the stitch (terrain)
 
@@ -681,7 +688,7 @@ public class MapGenerator : MonoBehaviour
         // Apply new heights to terrain
         terrainData.SetHeights(0, terrainData.heightmapHeight - 1, endStitchValues1);
         topTerrain.terrainData.SetHeights(0, 0, endStitchValues2);
-        
+
         /*
         ySize = (int)(terrainData.heightmapHeight * 0.02f);                         // Update ySize to do 2% to fix stitching
         float[,] startStitchValues1 = terrainData.GetHeights(0, terrainData.heightmapHeight - 1 - ySize, xSize, ySize);   // Put current stitch values to into an array (terrain)
@@ -745,7 +752,7 @@ public class MapGenerator : MonoBehaviour
 
         float[,,] splatMap1 = terrain.terrainData.GetAlphamaps(0, 0, splatWidth, splatHeight);          // Assign the current terrains splatmap width and height into an array
         float[,,] splatMap2 = topTerrain.terrainData.GetAlphamaps(0, 0, splatWidth, splatHeight);       // Assign the topTerrains splatmap width and height into an array
-        
+
         int numOfSplats = terrain.terrainData.terrainLayers.Length;                                     // Set number of splats available equal to the terrainlayers length (6)
         int ySplatMapPart = (int)(splatHeight * 0.02f);                                                 // Blend the splatmaps from both terrains at 0.02 from join
 
@@ -763,7 +770,7 @@ public class MapGenerator : MonoBehaviour
                                                            propotionOfTarget * splatMap2[(int)(propotionOfTarget * ySplatMapPart), x, j];
 
                     // Repeat for splatmap on other side of seam
-                    splatMap2[y, x, j] = propotionOfTarget * splatMap1[splatHeight - 1 - (int)(propotionOfTarget * ySplatMapPart), x, j] + 
+                    splatMap2[y, x, j] = propotionOfTarget * splatMap1[splatHeight - 1 - (int)(propotionOfTarget * ySplatMapPart), x, j] +
                                          propotionOfOriginal * splatMap2[(int)(propotionOfOriginal * ySplatMapPart), x, j];
                 }
             }
@@ -773,7 +780,7 @@ public class MapGenerator : MonoBehaviour
         // Apply bottom terrain splatmap
         topTerrain.terrainData.SetAlphamaps(0, 0, splatMap2);
     }
-    
+
     public void StitchToRight(Terrain terrain, Terrain rightTerrain, bool bottomTerrainFound, bool topTerrainFound)
     {
 
@@ -786,7 +793,7 @@ public class MapGenerator : MonoBehaviour
         float variationValue;                                               // Value for the variation in the blend
         float blendLimit;                                                   // The actual limit that the blending is done up to 
         float heightDiff;                                                   // Difference in height where heights are always between 0 and 1
-        
+
         /// Step 1:
         /// Take the last row of bottom terrain and apply heights to first row of new terrain
         /// 
@@ -796,7 +803,7 @@ public class MapGenerator : MonoBehaviour
 
         // Take the top y-column of neighbors heightmap array
         // resolution pixels wide (all x values), 1 pixel tall (single y value)
-        float[,] edgeValues = rightTerrain.terrainData.GetHeights(0, 0,  1, resolution);
+        float[,] edgeValues = rightTerrain.terrainData.GetHeights(0, 0, 1, resolution);
 
         // Stitch with other terrain by setting same heightmap values on the edge
         terrainData.SetHeights(resolution - 1, 0, edgeValues);
@@ -806,14 +813,14 @@ public class MapGenerator : MonoBehaviour
         /// Blend 10% of heights in new terrain to the height of the first row of the new terrain
         /// First row of the new terrain is the same as bottom terrain
         /// 
-        
+
         // Get current values of right 10% of widths to be smoothed
         int xSize = (int)(terrainData.heightmapWidth * 0.1f);                                                    // 10% of width
         int ySize = terrainData.heightmapHeight;                                                                 // Full height
         float[,] startValues = terrainData.GetHeights(terrainData.heightmapWidth - xSize, 0, xSize, ySize);  // Put current heights into array (x and y goes in reverse)
         float[,] endValues = new float[ySize, xSize];                                                            // Create array for new heights
 
-        
+
 
         // Loop through all the X's and Y's in the startValues array to workout the new values
         for (int y = 0; y < ySize; y++)
@@ -843,12 +850,12 @@ public class MapGenerator : MonoBehaviour
                 if (y < xSize && bottomTerrainFound == true)
                 {
                     endValues[y, x] = startValues[y, x];
-                    
+
                 }
                 else if (y > ySize - xSize && topTerrainFound == true)
                 {
                     endValues[y, x] = startValues[y, x];
-                    
+
                 }
                 else
                 {
@@ -859,7 +866,7 @@ public class MapGenerator : MonoBehaviour
 
         // Apply new heights to terrain
         terrainData.SetHeights(terrainData.heightmapWidth - xSize, 0, endValues);
-        
+
         /// 
         /// Step 3:
         /// Blend heights 2% either side of join with a target that is an average of the heights from both terrains and the seam height
@@ -886,7 +893,7 @@ public class MapGenerator : MonoBehaviour
         //rightTerrain.terrainData.SetHeights(0, 0, endStitchValues2);
 
 
-        
+
         /// 
         /// Step 4:
         /// Blend splatmaps from 2% either side of join
@@ -902,7 +909,7 @@ public class MapGenerator : MonoBehaviour
 
         float[,,] splatMap1 = terrain.terrainData.GetAlphamaps(0, 0, splatWidth, splatHeight);      // Assign the current terrains splatmap width and height into an array
         float[,,] splatMap2 = rightTerrain.terrainData.GetAlphamaps(0, 0, splatWidth, splatHeight); // Assign the topTerrains splatmap width and height into an array
-        
+
         int numOfSplats = terrain.terrainData.terrainLayers.Length;                                 // Set number of splats available equal to the terrainlayers length (6)
         int xSplatMapPart = (int)(splatWidth * 0.02f);                                              // Blend the splatmaps from both terrains at 0.02 from join
 
@@ -911,9 +918,9 @@ public class MapGenerator : MonoBehaviour
         {
             propotionOfOriginal = (Mathf.InverseLerp(0, xSplatMapPart, x) / 2) + 0.5f;  // InverseLerp gives a decimal 0.5 to 1 of where X is from xSplatMapPart(blend 2% splatmap height)
             propotionOfTarget = 1 - propotionOfOriginal;                                // Propotion of target and original always add up to 1
-            
+
             for (int y = 0; y < splatHeight; y++)
-                {
+            {
                 for (int j = 0; j < numOfSplats; j++)
                 {
                     // Update splatmap based on propotion of original side and other side of seam
@@ -931,7 +938,7 @@ public class MapGenerator : MonoBehaviour
         // Apply bottom terrain splatmap
         rightTerrain.terrainData.SetAlphamaps(0, 0, splatMap2);
     }
-    
+
     public void StitchToLeft(Terrain terrain, Terrain leftTerrain)
     {
         /// Step 1:
@@ -1023,7 +1030,7 @@ public class MapGenerator : MonoBehaviour
         /// This is to avoid sudden changes in direction
         /// 
 
-        
+
         float[,] startStitchValues1 = terrainData.GetHeights(0, 0, 2, ySize);   // Put current stitch values to into an array (terrain)
         float[,] endStitchValues1 = new float[ySize, 1];                        // Create array to store new heights for the end of the stitch (terrain)
 
@@ -1040,10 +1047,10 @@ public class MapGenerator : MonoBehaviour
         }
         // Apply new heights to terrain
         terrainData.SetHeights(0, 0, endStitchValues1);
-        leftTerrain.terrainData.SetHeights(leftTerrain.terrainData.heightmapWidth - 1,0, endStitchValues2);
+        leftTerrain.terrainData.SetHeights(leftTerrain.terrainData.heightmapWidth - 1, 0, endStitchValues2);
 
 
-       
+
 
 
         /*
@@ -1143,7 +1150,7 @@ public class MapGenerator : MonoBehaviour
     public float[,] SetPerlinNoise(int width, int height, NoiseValues _noiseValues, Vector2 sampleCentre, int seed)
     {
         float[,] map = new float[width, height];
-        
+
         // Randomise the seed
         System.Random randomSeed = new System.Random(seed);
 
@@ -1213,7 +1220,7 @@ public class MapGenerator : MonoBehaviour
                     if (perlinNoiseHeight < minNoiseHeight)
                     {
                         minNoiseHeight = perlinNoiseHeight;
-                    }                    
+                    }
                 }
                 map[x, y] = perlinNoiseHeight;
             }
@@ -1255,9 +1262,9 @@ public class MapGenerator : MonoBehaviour
                 {
                     closeness = closenessX;
                 }
-                else 
-                { 
-                    closeness = closenessY; 
+                else
+                {
+                    closeness = closenessY;
                 }
 
                 if (closeness < 0.1)
@@ -1270,8 +1277,8 @@ public class MapGenerator : MonoBehaviour
                 }
 
                 //map[x, y] = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, map[x, y]) ;
-                    
-                map[x, y] = (pointHeight * pointHeightMultiplier) + (1 - pointHeightMultiplier)/2;
+
+                map[x, y] = (pointHeight * pointHeightMultiplier) + (1 - pointHeightMultiplier) / 2;
             }
         }
 

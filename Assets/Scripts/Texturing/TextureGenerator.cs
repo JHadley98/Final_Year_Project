@@ -115,7 +115,7 @@ public class TextureGenerator : MonoBehaviour
 
     public void PartialSplatMap(TerrainData _terrainData, int startX, int startY, int mapWidth, int mapHeight)
     {
-        
+
 
         // 3D float array for the alpha width and height and the number of layers add to the terrain
         float[,,] splatmapData = new float[mapWidth, mapHeight, _terrainData.alphamapLayers];
