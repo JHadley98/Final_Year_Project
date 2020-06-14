@@ -36,7 +36,7 @@ public class TerrainAssetGenerator : MonoBehaviour
         _terrain.terrainData.wavingGrassSpeed = 0.5f;                                       // Set waving grass speed
         _terrain.terrainData.wavingGrassAmount = 0.5f;                                      // Set waving grass amount
         _terrain.terrainData.wavingGrassStrength = 0.5f;                                    // Set waving grass strength
-        _terrain.terrainData.wavingGrassTint = new Color(0.45f, 0.45f, 0.45f, 1);              // Set waving grass tint
+        _terrain.terrainData.wavingGrassTint = new Color(0.45f, 0.45f, 0.45f, 1);           // Set waving grass tint
 
         // Set details to equal the terrain detail width and hieght
         int[,] details = new int[_terrain.terrainData.detailWidth, _terrain.terrainData.detailHeight];

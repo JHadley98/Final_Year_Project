@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class TextureGenerator : MonoBehaviour
 {
@@ -43,7 +45,7 @@ public class TextureGenerator : MonoBehaviour
 
     // Start is called before the first frame update
 
-    public void SplatMap(Terrain _terrain)
+    public IEnumerator SplatMap(Terrain _terrain)
     {
         TerrainData _terrainData = _terrain.terrainData;
 
@@ -107,6 +109,7 @@ public class TextureGenerator : MonoBehaviour
                     splatmapData[x, y, j] = splatMap[j];
                 }
             }
+            yield return null;
         }
         // Apply splatmapdata to terrain
         _terrainData.SetAlphamaps(0, 0, splatmapData);
