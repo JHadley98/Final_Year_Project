@@ -415,7 +415,7 @@ public class MapGenerator : MonoBehaviour
             for (int y = 0; y < ySize; y++)
             {
 
-                propotionOfOriginal = Mathf.InverseLerp(0, blendLimit, y);  // InverseLerp gives a decimal 0 to 1 of where Y is from 0 to blend limit
+                // propotionOfOriginal = Mathf.InverseLerp(0, blendLimit, y);  // InverseLerp gives a decimal 0 to 1 of where Y is from 0 to blend limit
                 propotionOfOriginal = Mathf.SmoothStep(0f, 1f, y / blendLimit);
                 if (propotionOfOriginal > 1)                                // Propotion of the original cannot be more than 1
                 {
@@ -502,8 +502,8 @@ public class MapGenerator : MonoBehaviour
 
             for (int y = 0; y < ySize; y++)
             {
-                propotionOfOriginal = Mathf.InverseLerp(0, blendLimit, ySize - 1 - y); // InverseLerp gives a decimal 0 to 1 of where Y is from 0 to blend limit, ysize-y used as y=0 is 100% original
-
+                // propotionOfOriginal = Mathf.InverseLerp(0, blendLimit, ySize - 1 - y); // InverseLerp gives a decimal 0 to 1 of where Y is from 0 to blend limit, ysize-y used as y=0 is 100% original
+                propotionOfOriginal = Mathf.SmoothStep(0f, 1f, (ySize - 1 - y) / blendLimit);
                 if (propotionOfOriginal > 1)                                            // Propotion of the original cannot be more than 1
                 {
                     propotionOfOriginal = 1;
@@ -572,7 +572,8 @@ public class MapGenerator : MonoBehaviour
 
             for (int x = 0; x < xSize; x++)
             {
-                propotionOfOriginal = Mathf.InverseLerp(0, blendLimit, xSize - 1 - x);  // InverseLerp gives a decimal 0 to 1 of where X is from 0 to blend limit
+                // propotionOfOriginal = Mathf.InverseLerp(0, blendLimit, xSize - 1 - x);  // InverseLerp gives a decimal 0 to 1 of where X is from 0 to blend limit
+                propotionOfOriginal = Mathf.SmoothStep(0f, 1f, (xSize - 1 - x) / blendLimit);
 
                 if (propotionOfOriginal > 1)                                            // Propotion of the original cannot be more than 1
                 {
@@ -662,7 +663,8 @@ public class MapGenerator : MonoBehaviour
 
             for (int x = 0; x < xSize; x++)
             {
-                propotionOfOriginal = Mathf.InverseLerp(0, blendLimit, x);  // InverseLerp gives a decimal 0 to 1 of where X is from 0 to blend limit
+                // propotionOfOriginal = Mathf.InverseLerp(0, blendLimit, x);  // InverseLerp gives a decimal 0 to 1 of where X is from 0 to blend limit
+                propotionOfOriginal = Mathf.SmoothStep(0f, 1f, x / blendLimit);
 
                 if (propotionOfOriginal > 1)                                // Propotion of the original cannot be more than 1
                 {

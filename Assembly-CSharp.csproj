@@ -63,14 +63,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\EnemyAI\Scripts\Enemy\EnemyAI.cs" />
-    <Compile Include="Assets\EnemyAI\Scripts\Player\PlayerController.cs" />
-    <Compile Include="Assets\EnemyAI\Scripts\Procedural_Generation\MapGenerator.cs" />
-    <Compile Include="Assets\EnemyAI\Scripts\Procedural_Generation\TerrainAssetGenerator.cs" />
-    <Compile Include="Assets\EnemyAI\Scripts\Procedural_Generation\TerrainChunk.cs" />
-    <Compile Include="Assets\EnemyAI\Scripts\Texturing\TextureGenerator.cs" />
-    <Compile Include="Assets\EnemyAI\Scripts\World\GameWorld.cs" />
-    <Compile Include="Assets\EnemyAI\Scripts\World\MainController.cs" />
+    <Compile Include="Assets\Scripts\Enemy\EnemyAI.cs" />
+    <Compile Include="Assets\Scripts\Player\PlayerController.cs" />
+    <Compile Include="Assets\Scripts\Procedural_Generation\MapGenerator.cs" />
+    <Compile Include="Assets\Scripts\Procedural_Generation\TerrainAssetGenerator.cs" />
+    <Compile Include="Assets\Scripts\Procedural_Generation\TextureGenerator.cs" />
+    <Compile Include="Assets\Scripts\World\GameWorld.cs" />
+    <Compile Include="Assets\Scripts\World\MainController.cs" />
     <None Include="Assets\Terrain\TerrainTextures\Read Me.txt" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>C:/Users/james/Documents/Teesside University/Computer Games Programming/Year 3/FYP/Final_Year_Project/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
