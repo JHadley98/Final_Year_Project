@@ -119,6 +119,7 @@ public class TerrainAssetGenerator : MonoBehaviour
                     {
                         treeInstance = new TreeInstance();  // Create trees
                         treeInstance.prototypeIndex = 0;    // Create palm trees
+                        // Set tree scale for width and height
                         treeInstance.widthScale = 0.7f;
                         treeInstance.heightScale = 0.7f;
                         treeMade = true;
@@ -127,6 +128,7 @@ public class TerrainAssetGenerator : MonoBehaviour
                     {
                         treeInstance = new TreeInstance();  // Create trees
                         treeInstance.prototypeIndex = 1;    // Create broad leaf trees trees
+                        // Set tree scale for width and height
                         treeInstance.widthScale = 0.3f;
                         treeInstance.heightScale = 0.3f;
                         treeMade = true;
@@ -135,6 +137,7 @@ public class TerrainAssetGenerator : MonoBehaviour
                     {
                         treeInstance = new TreeInstance();  // Create trees
                         treeInstance.prototypeIndex = 2;    // Create conifer trees
+                        // Set tree scale for width and height
                         treeInstance.widthScale = 0.3f;
                         treeInstance.heightScale = 0.3f;
                         treeMade = true;
@@ -149,18 +152,14 @@ public class TerrainAssetGenerator : MonoBehaviour
                         // Set tree position to be always be on terrain
                         treeInstance.position = new Vector3((x + treeRandomPosition) / _terrain.terrainData.size.x, 0, (z + treeRandomPosition) / _terrain.terrainData.size.z);
 
-
-                        // Set tree scale for width and height
-                        //treeInstance.widthScale = 0.3f;
-                        //treeInstance.heightScale = 0.3f;
-
                         // Add tree instance to terrain
                         _terrain.AddTreeInstance(treeInstance);
                         // Apply changes done in terrain so it takes effect
                         _terrain.Flush();
 
-                        // Set collider position to be equal to 
-                        colliderPos = new Vector3((x + treeRandomPosition) + _terrain.transform.position.x, _terrain.SampleHeight(new Vector3(x + _terrain.transform.position.x, 0, z + _terrain.transform.position.z)), (z + treeRandomPosition) + _terrain.transform.position.z);
+                        // Set collider position to be equal to terrain height at which the trees are generated
+                        colliderPos = new Vector3(x + treeRandomPosition + _terrain.transform.position.x, _terrain.SampleHeight(new Vector3(x + _terrain.transform.position.x, 0, z
+                            + _terrain.transform.position.z)), z + treeRandomPosition + _terrain.transform.position.z);
                         _collider = new GameObject();
                         _collider.gameObject.AddComponent<CapsuleCollider>();
                         _collider.transform.position = colliderPos;                 // Set the collider position to be equal to the collider position placing the capsule collider at the trees position

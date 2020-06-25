@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 // Height map and noise class
@@ -14,44 +15,29 @@ public class MapGenerator : MonoBehaviour
     public MainController _mainController;
     public TerrainAssetGenerator _terrainAssetGenerator;
 
+    private int splatCount = 1;
+
     // Float arrays for heightmap and splat data
     private float[,] heightmapData;
     private float[,,] splatData;
 
-    // Default terrain data, used to store the values for the initial terrain
-    private TerrainData defaultTD;
-    // Create next terrain chunk
-    private GameObject nextTerrainChunk;
-    // Create next terrain
-    private Terrain _nextTerrain;
+    private TerrainData defaultTD;          // Default terrain data, used to store the values for the initial terrain
+    private GameObject nextTerrainChunk;    // Create next terrain chunk
+    private Terrain _nextTerrain;           // Create next terrain
+    private Terrain[] _terrains;            // Terrains array
 
-    // Terrains array
-    private Terrain[] _terrains;
+    private Vector3 checkTerrainPosition;   // Check all positions of the terrains in the terrains array
+    private Vector3 currentTerrainPosition; // Get current terrain position
+    private Vector3[] surroundingTerrain;   // Used to set the surronding terrain position in endless terrain
+    private Vector3[] neighbouringTerrain;  // Used to set the neighbouring terrain position in endless terrain
+    private Vector2 terrainCentre;          // Calculate center of terrain
 
-    // Check all positions of the terrains in the terrains array
-    private Vector3 checkTerrainPosition;
-    // Get current terrain position
-    private Vector3 currentTerrainPosition;
-    // Used to set the surronding terrain position in endless terrain
-    private Vector3[] surroundingTerrain;
-    private Vector3[] neighbouringTerrain;
-    // Calculate center of terrain
-    private Vector2 terrainCentre;
-
-    // Set number of terrains, used to change how many possible heightmap and splatmaps are used
-    public int numOfTerrains;
-    // Terrain number that is created
-    private int terrainNumber = 0;
-    // Create float 2D array list of terrain heights
-    private List<float[,]> terrainHeights = new List<float[,]>();
-    // Create 3D float array for terrainS splatmap
-    private List<float[,,]> terrainSplatmap = new List<float[,,]>();
-
-    // Check if terrain is found when checking around the current terrain the player is on
-    private bool terrainFound;
-    private bool terrainOneFound;
-    private bool terrainTwoFound;
-    private float distToJoin;
+    public int numOfTerrains;                                           // Set number of terrains, used to change how many possible heightmap and splatmaps are used
+    private int terrainNumber = 0;                                      // Terrain number that is created
+    private List<float[,]> terrainHeights = new List<float[,]>();       // Create float 2D array list of terrain heights
+    private List<float[,,]> terrainSplatmap = new List<float[,,]>();    // Create 3D float array for terrainS splatmap
+        
+    private bool terrainFound;  // Check if terrain is found when checking around the current terrain the player is on
 
     private Terrain terrainLeft;
     private Terrain terrainRight;
@@ -65,47 +51,33 @@ public class MapGenerator : MonoBehaviour
 
     private int xSize;
     private int ySize;
-
-    float propotionOfOriginal;
-    float propotionOfTarget;
     
-    float distToX1;
-    float distToX2;
-    float distToY1;
-    float distToY2;
-    float influenceX1;
-    float influenceX2;
-    float influenceY1;
-    float influenceY2;
-    float influenceX;
-    float influenceY;
-
-    float influenceHeightX1;
-    float influenceHeightX2;
-    float influenceHeightY1;
-    float influenceHeightY2;
-    float influenceXHeight;
-    float influenceYHeight;
-    float target;
+    private float propotionOfOriginal;
+    private float propotionOfTarget;
+    private float distToX1;
+    private float distToX2;
+    private float distToY1;
+    private float distToY2;
+    private float influenceX1;
+    private float influenceX2;
+    private float influenceY1;
+    private float influenceY2;
+    private float influenceX;
+    private float influenceY;
+    private float influenceHeightX1;
+    private float influenceHeightX2;
+    private float influenceHeightY1;
+    private float influenceHeightY2;
+    private float influenceXHeight;
+    private float influenceYHeight;
+    private float target;
 
     void Start()
     {
+        ApplyTerrainsData();
+
         // Calculate center of terrain
         terrainCentre = new Vector2(_terrain.terrainData.size.x / 2, _terrain.terrainData.size.z / 2);
-
-        // Loop throug number of terrains applying the heightmap, splatmap and terrain heights
-        for (int i = 0; i < numOfTerrains; i++)
-        {
-            // Set heightmapData to eqaul the perlin noise function, passing in the terrain width, height, noise values applied to map, and random value times 100 to create random terrain seeds
-            heightmapData = SetPerlinNoise(_terrain.terrainData.heightmapWidth, _terrain.terrainData.heightmapHeight, _noiseValues, terrainCentre, (int)(Random.value * 100));
-            // Set heights for initial terrain
-            _terrain.terrainData.SetHeights(0, 0, heightmapData);
-            // Apply SplatMap to terrain (textures)
-            _textureGenerator.SplatMap(_terrain);
-
-            terrainHeights.Add(heightmapData);
-            terrainSplatmap.Add(_terrain.terrainData.GetAlphamaps(0, 0, _terrain.terrainData.alphamapWidth, _terrain.terrainData.alphamapHeight));
-        }
 
         // Creates default terrain data to equal current terrain data
         defaultTD = _terrain.terrainData;
@@ -125,6 +97,23 @@ public class MapGenerator : MonoBehaviour
         for (int i = 0; i < 8; i++)
         {
             CreateEndlessTerrain(_terrain);
+        }
+    }
+
+    private void ApplyTerrainsData()
+    {
+        // Loop through number of terrains applying the heightmap, splatmap and terrain heights
+        for (int i = 0; i < numOfTerrains; i++)
+        {
+            // Set heightmapData to eqaul the perlin noise function, passing in the terrain width, height, noise values applied to map, and random value times 100 to create random terrain seeds
+            heightmapData = SetPerlinNoise(_terrain.terrainData.heightmapWidth, _terrain.terrainData.heightmapHeight, _noiseValues, terrainCentre, (int)(Random.value * 100));
+            // Set heights for initial terrain
+            _terrain.terrainData.SetHeights(0, 0, heightmapData);
+            // Apply SplatMap to terrain (textures)
+            _textureGenerator.splatMapCaller(_terrain, splatCount);
+
+            terrainHeights.Add(heightmapData);
+            terrainSplatmap.Add(_terrain.terrainData.GetAlphamaps(0, 0, _terrain.terrainData.alphamapWidth, _terrain.terrainData.alphamapHeight));
         }
     }
 
@@ -149,7 +138,7 @@ public class MapGenerator : MonoBehaviour
         neighbouringTerrain[0] = new Vector3(0, 0, -defaultTD.size.z); // Bottom terrain
         neighbouringTerrain[1] = new Vector3(-defaultTD.size.x, 0, 0); // Left terrain
         neighbouringTerrain[2] = new Vector3(0, 0, defaultTD.size.z);  // Top terrain
-        neighbouringTerrain[3] = new Vector3(defaultTD.size.x, 0, 0); // Right terrain
+        neighbouringTerrain[3] = new Vector3(defaultTD.size.x, 0, 0);  // Right terrain
 
         heightmapData = terrainHeights[terrainNumber];
 
@@ -166,7 +155,7 @@ public class MapGenerator : MonoBehaviour
             terrainNumber++;
         }
 
-        //Get all terrains into an array to check
+        // Get all terrains into an array to check
         _terrains = Terrain.activeTerrains;
 
         //// Loops through each of the surrounding terrain positions, checks if it exists and if not build one and only one
@@ -185,175 +174,175 @@ public class MapGenerator : MonoBehaviour
             }
 
             //// This is where the new terrain is created
-            if (terrainFound == false)
+            if (terrainFound != false)
             {
-                // Create new terrain object
-                nextTerrainChunk = Terrain.CreateTerrainGameObject(new TerrainData());
-                // Set position for new terrain
-                nextTerrainChunk.transform.position = surroundingTerrain[x] + currentTerrainPosition;
-
-                // Next terrain equals new terrain
-                _nextTerrain = nextTerrainChunk.GetComponent<Terrain>();
-
-                // Set next terrain values equal to default terrain data
-                _nextTerrain.terrainData.terrainLayers = defaultTD.terrainLayers;
-                _nextTerrain.terrainData.heightmapResolution = defaultTD.heightmapResolution;
-                _nextTerrain.terrainData.baseMapResolution = defaultTD.baseMapResolution;
-                _nextTerrain.terrainData.size = defaultTD.size;
-                _nextTerrain.terrainData.treePrototypes = defaultTD.treePrototypes;
-                _nextTerrain.terrainData.detailPrototypes = defaultTD.detailPrototypes;
-                _nextTerrain.terrainData.SetDetailResolution(defaultTD.detailResolution, defaultTD.detailResolutionPerPatch);
-
-
-                // Set heights for terrain
-                _nextTerrain.terrainData.SetHeights(0, 0, heightmapData);
-                // Apply SplatMap to terrain (textures)
-                _nextTerrain.terrainData.SetAlphamaps(0, 0, splatData);
-
-                // Check for neighbours
-                terrainLeftFound = false;
-                terrainRightFound = false;
-                terrainTopFound = false;
-                terrainBottomFound = false;
-
-                //// Now check new terrain for neighbours
-                for (int i = 0; i < _terrains.Length; i++)
-                {
-                    checkTerrainPosition = _terrains[i].GetPosition();
-                    if (checkTerrainPosition == neighbouringTerrain[0] + nextTerrainChunk.transform.position)
-                    {
-                        terrainBottomFound = true;
-                        terrainBottom = _terrains[i];
-                    }
-                    else if (checkTerrainPosition == neighbouringTerrain[1] + nextTerrainChunk.transform.position)
-                    {
-                        terrainLeftFound = true;
-                        terrainLeft = _terrains[i];
-                    }
-                    else if (checkTerrainPosition == neighbouringTerrain[2] + nextTerrainChunk.transform.position)
-                    {
-                        terrainTopFound = true;
-                        terrainTop = _terrains[i];
-                    }
-                    else if (checkTerrainPosition == neighbouringTerrain[3] + nextTerrainChunk.transform.position)
-                    {
-                        terrainRightFound = true;
-                        terrainRight = _terrains[i];
-                    }
-                }
-
-                ////
-                if (terrainBottomFound == true)
-                {
-                    StitchToBottom(_nextTerrain, terrainBottom, terrainLeftFound, terrainRightFound);
-                    // Add neighbour to set neighbours
-                    _nextTerrain.SetNeighbors(_nextTerrain.leftNeighbor, _nextTerrain.topNeighbor, _nextTerrain.rightNeighbor, terrainBottom);
-                    // Add the new terrain to the existing terrain neighbours
-                    terrainBottom.SetNeighbors(terrainBottom.leftNeighbor, _nextTerrain, terrainBottom.rightNeighbor, terrainBottom.bottomNeighbor);
-                }
-                if (terrainLeftFound == true)
-                {
-                    StitchToLeft(_nextTerrain, terrainLeft);
-                    // Add neighbour to set neighbours
-                    _nextTerrain.SetNeighbors(terrainLeft, _nextTerrain.topNeighbor, _nextTerrain.rightNeighbor, _nextTerrain.bottomNeighbor);
-                    // Add the new terrain to the existing terrain neighbours
-                    terrainLeft.SetNeighbors(terrainLeft.leftNeighbor, terrainLeft.topNeighbor, _nextTerrain, terrainLeft.bottomNeighbor);
-                }
-                if (terrainTopFound == true)
-                {
-                    StitchToTop(_nextTerrain, terrainTop);
-
-                    // Add neighbour to set neighbours
-                    _nextTerrain.SetNeighbors(_nextTerrain.leftNeighbor, terrainTop, _nextTerrain.rightNeighbor, _nextTerrain.bottomNeighbor);
-                    // Add the new terrain to the existing terrain neighbours
-                    terrainTop.SetNeighbors(terrainTop.leftNeighbor, terrainTop.topNeighbor, terrainTop.rightNeighbor, _nextTerrain);
-                }
-                if (terrainRightFound == true)
-                {
-                    StitchToRight(_nextTerrain, terrainRight, terrainBottomFound, terrainTopFound);
-                    // Add neighbour to set neighbours
-                    _nextTerrain.SetNeighbors(_nextTerrain.leftNeighbor, _nextTerrain.topNeighbor, terrainRight, _nextTerrain.bottomNeighbor);
-                    // Add the new terrain to the existing terrain neighbours
-                    terrainRight.SetNeighbors(_nextTerrain, terrainRight.topNeighbor, terrainRight.rightNeighbor, terrainRight.bottomNeighbor);
-                }
-
-                ////
-                if (terrainBottomFound == true && terrainRightFound == true)
-                {
-                    xSize = (int)(_nextTerrain.terrainData.heightmapWidth * 0.1f) + 1;               // 10% of Width +1
-                    ySize = (int)(_nextTerrain.terrainData.heightmapHeight * 0.1f) + 1;              // 10% of height +1
-                    SmoothCorner(_nextTerrain, xSize, ySize, _nextTerrain.terrainData.heightmapWidth - xSize, 0);
-                    StitchBottomSeam(_nextTerrain, terrainBottom);
-                    StitchRightSeam(_nextTerrain, terrainRight);
-                    StitchHorizontalSeam(_nextTerrain, _nextTerrain.terrainData.heightmapWidth - xSize, ySize, xSize);
-                    StitchVericalSeam(_nextTerrain, _nextTerrain.terrainData.heightmapWidth - xSize, 0, ySize);
-                }
-
-                if (terrainBottomFound == true && terrainLeftFound == true)
-                {
-                    xSize = (int)(_nextTerrain.terrainData.heightmapWidth * 0.1f) + 1;               // 10% of Width +1
-                    ySize = (int)(_nextTerrain.terrainData.heightmapHeight * 0.1f) + 1;              // 10% of height +1
-                    SmoothCorner(_nextTerrain, xSize, ySize, 0, 0);
-                    StitchBottomSeam(_nextTerrain, terrainBottom);
-                    StitchLeftSeam(_nextTerrain, terrainLeft);
-                    StitchHorizontalSeam(_nextTerrain, 0, ySize, xSize);
-                    StitchVericalSeam(_nextTerrain, xSize, 0, ySize);
-                }
-
-                if (terrainTopFound == true && terrainRightFound == true)
-                {
-                    xSize = (int)(_nextTerrain.terrainData.heightmapWidth * 0.1f) + 1;               // 10% of Width +1
-                    ySize = (int)(_nextTerrain.terrainData.heightmapHeight * 0.1f) + 1;              // 10% of height +1
-                    SmoothCorner(_nextTerrain, xSize, ySize, _nextTerrain.terrainData.heightmapWidth - xSize, _nextTerrain.terrainData.heightmapHeight - ySize);
-                    StitchTopSeam(_nextTerrain, terrainTop);
-                    StitchRightSeam(_nextTerrain, terrainRight);
-                    StitchHorizontalSeam(_nextTerrain, _nextTerrain.terrainData.heightmapWidth - xSize, _nextTerrain.terrainData.heightmapHeight - ySize, xSize);
-                    StitchVericalSeam(_nextTerrain, _nextTerrain.terrainData.heightmapWidth - xSize, _nextTerrain.terrainData.heightmapHeight - ySize, ySize);
-                }
-
-                if (terrainTopFound == true && terrainLeftFound == true)
-                {
-                    xSize = (int)(_nextTerrain.terrainData.heightmapWidth * 0.1f) + 1;               // 10% of Width +1
-                    ySize = (int)(_nextTerrain.terrainData.heightmapHeight * 0.1f) + 1;              // 10% of height +1
-                    SmoothCorner(_nextTerrain, xSize, ySize, 0, _nextTerrain.terrainData.heightmapHeight - ySize);
-                    StitchTopSeam(_nextTerrain, terrainTop);
-                    StitchLeftSeam(_nextTerrain, terrainLeft);
-                    StitchHorizontalSeam(_nextTerrain, 0, _nextTerrain.terrainData.heightmapHeight - ySize, xSize);
-                    StitchVericalSeam(_nextTerrain, xSize, _nextTerrain.terrainData.heightmapHeight - ySize, ySize);
-                }
-
-                // Update entire splatmap to reflect the change in heights
-                _textureGenerator.SplatMap(_nextTerrain);
-
-                /// Blend splatmap edges with neighbors if the terrains are found
-                if (terrainBottomFound == true)
-                {
-                    SplatBlendBottom(_nextTerrain, terrainBottom);
-                }
-                if (terrainRightFound == true)
-                {
-                    SplatBlendRight(_nextTerrain, terrainRight);
-                }
-                if (terrainTopFound == true)
-                {
-                    SplatBlendTop(_nextTerrain, terrainTop);
-                }
-                if (terrainLeftFound == true)
-                {
-                    SplatBlendLeft(_nextTerrain, terrainLeft);
-                }
-
-                // Create tress across endless terrain
-                _terrainAssetGenerator.CreateTrees(_nextTerrain);
-
-                // Create water across endless terrain
-                _terrainAssetGenerator.CreateWater(_nextTerrain);
-
-                // Create grass across endless terrain
-                _terrainAssetGenerator.CreateGrass(_nextTerrain);
-
-                terrainBuilt = true;
+                continue;
             }
+            // Create new terrain object
+            nextTerrainChunk = Terrain.CreateTerrainGameObject(new TerrainData());
+            // Set position for new terrain
+            nextTerrainChunk.transform.position = surroundingTerrain[x] + currentTerrainPosition;
+
+            // Next terrain equals new terrain
+            _nextTerrain = nextTerrainChunk.GetComponent<Terrain>();
+
+            // Set next terrain values equal to default terrain data
+            _nextTerrain.terrainData.terrainLayers = defaultTD.terrainLayers;
+            _nextTerrain.terrainData.heightmapResolution = defaultTD.heightmapResolution;
+            _nextTerrain.terrainData.baseMapResolution = defaultTD.baseMapResolution;
+            _nextTerrain.terrainData.size = defaultTD.size;
+            _nextTerrain.terrainData.treePrototypes = defaultTD.treePrototypes;
+            _nextTerrain.terrainData.detailPrototypes = defaultTD.detailPrototypes;
+            _nextTerrain.terrainData.SetDetailResolution(defaultTD.detailResolution, defaultTD.detailResolutionPerPatch);
+
+            // Set heights for terrain
+            _nextTerrain.terrainData.SetHeights(0, 0, heightmapData);
+            // Apply SplatMap to terrain (textures)
+            _nextTerrain.terrainData.SetAlphamaps(0, 0, splatData);
+
+            // Check for neighbours
+            terrainLeftFound = false;
+            terrainRightFound = false;
+            terrainTopFound = false;
+            terrainBottomFound = false;
+
+            //// Now check new terrain for neighbours
+            foreach (Terrain _terrains in _terrains)
+            {
+                checkTerrainPosition = _terrains.GetPosition();
+                if (checkTerrainPosition == neighbouringTerrain[0] + nextTerrainChunk.transform.position)
+                {
+                    terrainBottomFound = true;
+                    terrainBottom = _terrains;
+                }
+                else if (checkTerrainPosition == neighbouringTerrain[1] + nextTerrainChunk.transform.position)
+                {
+                    terrainLeftFound = true;
+                    terrainLeft = _terrains;
+                }
+                else if (checkTerrainPosition == neighbouringTerrain[2] + nextTerrainChunk.transform.position)
+                {
+                    terrainTopFound = true;
+                    terrainTop = _terrains;
+                }
+                else if (checkTerrainPosition == neighbouringTerrain[3] + nextTerrainChunk.transform.position)
+                {
+                    terrainRightFound = true;
+                    terrainRight = _terrains;
+                }
+            }
+
+            //// Stitch terrains together
+            if (terrainBottomFound == true)
+            {
+                StitchToBottom(_nextTerrain, terrainBottom, terrainLeftFound, terrainRightFound);
+                // Add neighbour to set neighbours
+                _nextTerrain.SetNeighbors(_nextTerrain.leftNeighbor, _nextTerrain.topNeighbor, _nextTerrain.rightNeighbor, terrainBottom);
+                // Add the new terrain to the existing terrain neighbours
+                terrainBottom.SetNeighbors(terrainBottom.leftNeighbor, _nextTerrain, terrainBottom.rightNeighbor, terrainBottom.bottomNeighbor);
+            }
+            if (terrainLeftFound == true)
+            {
+                StitchToLeft(_nextTerrain, terrainLeft);
+                // Add neighbour to set neighbours
+                _nextTerrain.SetNeighbors(terrainLeft, _nextTerrain.topNeighbor, _nextTerrain.rightNeighbor, _nextTerrain.bottomNeighbor);
+                // Add the new terrain to the existing terrain neighbours
+                terrainLeft.SetNeighbors(terrainLeft.leftNeighbor, terrainLeft.topNeighbor, _nextTerrain, terrainLeft.bottomNeighbor);
+            }
+            if (terrainTopFound == true)
+            {
+                StitchToTop(_nextTerrain, terrainTop);
+
+                // Add neighbour to set neighbours
+                _nextTerrain.SetNeighbors(_nextTerrain.leftNeighbor, terrainTop, _nextTerrain.rightNeighbor, _nextTerrain.bottomNeighbor);
+                // Add the new terrain to the existing terrain neighbours
+                terrainTop.SetNeighbors(terrainTop.leftNeighbor, terrainTop.topNeighbor, terrainTop.rightNeighbor, _nextTerrain);
+            }
+            if (terrainRightFound == true)
+            {
+                StitchToRight(_nextTerrain, terrainRight, terrainBottomFound, terrainTopFound);
+                // Add neighbour to set neighbours
+                _nextTerrain.SetNeighbors(_nextTerrain.leftNeighbor, _nextTerrain.topNeighbor, terrainRight, _nextTerrain.bottomNeighbor);
+                // Add the new terrain to the existing terrain neighbours
+                terrainRight.SetNeighbors(_nextTerrain, terrainRight.topNeighbor, terrainRight.rightNeighbor, terrainRight.bottomNeighbor);
+            }
+
+            //// Stitch bottom right terrain
+            if (terrainBottomFound == true && terrainRightFound == true)
+            {
+                xSize = (int)(_nextTerrain.terrainData.heightmapWidth * 0.1f) + 1;               // 10% of Width +1
+                ySize = (int)(_nextTerrain.terrainData.heightmapHeight * 0.1f) + 1;              // 10% of height +1
+                SmoothCorner(_nextTerrain, xSize, ySize, _nextTerrain.terrainData.heightmapWidth - xSize, 0);
+                StitchBottomSeam(_nextTerrain, terrainBottom);
+                StitchRightSeam(_nextTerrain, terrainRight);
+                StitchHorizontalSeam(_nextTerrain, _nextTerrain.terrainData.heightmapWidth - xSize, ySize, xSize);
+                StitchVericalSeam(_nextTerrain, _nextTerrain.terrainData.heightmapWidth - xSize, 0, ySize);
+            }
+            //// Stitch bottom left terrain
+            if (terrainBottomFound == true && terrainLeftFound == true)
+            {
+                xSize = (int)(_nextTerrain.terrainData.heightmapWidth * 0.1f) + 1;               // 10% of Width +1
+                ySize = (int)(_nextTerrain.terrainData.heightmapHeight * 0.1f) + 1;              // 10% of height +1
+                SmoothCorner(_nextTerrain, xSize, ySize, 0, 0);
+                StitchBottomSeam(_nextTerrain, terrainBottom);
+                StitchLeftSeam(_nextTerrain, terrainLeft);
+                StitchHorizontalSeam(_nextTerrain, 0, ySize, xSize);
+                StitchVericalSeam(_nextTerrain, xSize, 0, ySize);
+            }
+            //// Stitch top right terrain
+            if (terrainTopFound == true && terrainRightFound == true)
+            {
+                xSize = (int)(_nextTerrain.terrainData.heightmapWidth * 0.1f) + 1;               // 10% of Width +1
+                ySize = (int)(_nextTerrain.terrainData.heightmapHeight * 0.1f) + 1;              // 10% of height +1
+                SmoothCorner(_nextTerrain, xSize, ySize, _nextTerrain.terrainData.heightmapWidth - xSize, _nextTerrain.terrainData.heightmapHeight - ySize);
+                StitchTopSeam(_nextTerrain, terrainTop);
+                StitchRightSeam(_nextTerrain, terrainRight);
+                StitchHorizontalSeam(_nextTerrain, _nextTerrain.terrainData.heightmapWidth - xSize, _nextTerrain.terrainData.heightmapHeight - ySize, xSize);
+                StitchVericalSeam(_nextTerrain, _nextTerrain.terrainData.heightmapWidth - xSize, _nextTerrain.terrainData.heightmapHeight - ySize, ySize);
+            }
+            //// Stitch top left terrain
+            if (terrainTopFound == true && terrainLeftFound == true)
+            {
+                xSize = (int)(_nextTerrain.terrainData.heightmapWidth * 0.1f) + 1;               // 10% of Width +1
+                ySize = (int)(_nextTerrain.terrainData.heightmapHeight * 0.1f) + 1;              // 10% of height +1
+                SmoothCorner(_nextTerrain, xSize, ySize, 0, _nextTerrain.terrainData.heightmapHeight - ySize);
+                StitchTopSeam(_nextTerrain, terrainTop);
+                StitchLeftSeam(_nextTerrain, terrainLeft);
+                StitchHorizontalSeam(_nextTerrain, 0, _nextTerrain.terrainData.heightmapHeight - ySize, xSize);
+                StitchVericalSeam(_nextTerrain, xSize, _nextTerrain.terrainData.heightmapHeight - ySize, ySize);
+            }
+            _nextTerrain.Flush();
+            // Update entire splatmap to reflect the change in heights
+            _textureGenerator.splatMapCaller(_nextTerrain, splatCount);
+
+            /// Blend splatmap edges with neighbors if the terrains are found
+            if (terrainBottomFound == true)
+            {
+                SplatBlendBottom(_nextTerrain, terrainBottom);
+            }
+            if (terrainRightFound == true)
+            {
+                SplatBlendRight(_nextTerrain, terrainRight);
+            }
+            if (terrainTopFound == true)
+            {
+                SplatBlendTop(_nextTerrain, terrainTop);
+            }
+            if (terrainLeftFound == true)
+            {
+                SplatBlendLeft(_nextTerrain, terrainLeft);
+            }
+
+            // Create tress across endless terrain
+            _terrainAssetGenerator.CreateTrees(_nextTerrain);
+
+            // Create water across endless terrain
+            _terrainAssetGenerator.CreateWater(_nextTerrain);
+
+            // Create grass across endless terrain
+            _terrainAssetGenerator.CreateGrass(_nextTerrain);
+
+            terrainBuilt = true;
         }
         // No terrains built in this loop, turn off request new needed terrain
         if (terrainBuilt == false)
@@ -388,7 +377,7 @@ public class MapGenerator : MonoBehaviour
         int xSize = terrainData.heightmapWidth;                             // Full width of terrain
         int ySize = (int)(terrainData.heightmapHeight * 0.1f);              // 10% of height
         float[,] startValues = terrainData.GetHeights(0, 0, xSize, ySize);  // Put current heights into array (x and y goes in reverse)
-        float[,] endValues = new float[ySize, xSize];                        // Create array for new heights
+        float[,] endValues = new float[ySize, xSize];                       // Create array for new heights
 
         // Smooth out terrain based on a propotion of original terrain and the edge with the neighbour
         float propotionOfOriginal;                                          // Propotion of original height to be used in the new height
@@ -414,9 +403,8 @@ public class MapGenerator : MonoBehaviour
 
             for (int y = 0; y < ySize; y++)
             {
-
                 // propotionOfOriginal = Mathf.InverseLerp(0, blendLimit, y);  // InverseLerp gives a decimal 0 to 1 of where Y is from 0 to blend limit
-                propotionOfOriginal = Mathf.SmoothStep(0f, 1f, y / blendLimit);
+                propotionOfOriginal = Mathf.SmoothStep(0f, 1f, y / blendLimit); // SmoothStep interpolates between 0 and 1 smoothing at the limits giving a smooth curve line
                 if (propotionOfOriginal > 1)                                // Propotion of the original cannot be more than 1
                 {
                     propotionOfOriginal = 1;
@@ -503,7 +491,7 @@ public class MapGenerator : MonoBehaviour
             for (int y = 0; y < ySize; y++)
             {
                 // propotionOfOriginal = Mathf.InverseLerp(0, blendLimit, ySize - 1 - y); // InverseLerp gives a decimal 0 to 1 of where Y is from 0 to blend limit, ysize-y used as y=0 is 100% original
-                propotionOfOriginal = Mathf.SmoothStep(0f, 1f, (ySize - 1 - y) / blendLimit);
+                propotionOfOriginal = Mathf.SmoothStep(0f, 1f, (ySize - 1 - y) / blendLimit);   // SmoothStep interpolates between 0 and 1 smoothing at the limits giving a smooth curve line
                 if (propotionOfOriginal > 1)                                            // Propotion of the original cannot be more than 1
                 {
                     propotionOfOriginal = 1;
@@ -573,7 +561,7 @@ public class MapGenerator : MonoBehaviour
             for (int x = 0; x < xSize; x++)
             {
                 // propotionOfOriginal = Mathf.InverseLerp(0, blendLimit, xSize - 1 - x);  // InverseLerp gives a decimal 0 to 1 of where X is from 0 to blend limit
-                propotionOfOriginal = Mathf.SmoothStep(0f, 1f, (xSize - 1 - x) / blendLimit);
+                propotionOfOriginal = Mathf.SmoothStep(0f, 1f, (xSize - 1 - x) / blendLimit);   // SmoothStep interpolates between 0 and 1 smoothing at the limits giving a smooth curve line
 
                 if (propotionOfOriginal > 1)                                            // Propotion of the original cannot be more than 1
                 {
@@ -664,7 +652,7 @@ public class MapGenerator : MonoBehaviour
             for (int x = 0; x < xSize; x++)
             {
                 // propotionOfOriginal = Mathf.InverseLerp(0, blendLimit, x);  // InverseLerp gives a decimal 0 to 1 of where X is from 0 to blend limit
-                propotionOfOriginal = Mathf.SmoothStep(0f, 1f, x / blendLimit);
+                propotionOfOriginal = Mathf.SmoothStep(0f, 1f, x / blendLimit); // SmoothStep interpolates between 0 and 1 smoothing at the limits giving a smooth curve line
 
                 if (propotionOfOriginal > 1)                                // Propotion of the original cannot be more than 1
                 {
@@ -691,7 +679,10 @@ public class MapGenerator : MonoBehaviour
         int splatHeight = terrainData.alphamapHeight;
 
         float[,,] splatMap1 = terrain.terrainData.GetAlphamaps(0, 0, splatWidth, splatHeight);          // Put the current terrains splatmap width and height into an array
+        float[,,] splatMap1End = terrain.terrainData.GetAlphamaps(0, 0, splatWidth, splatHeight);       // Put the current terrains splatmap width and height into an array
+
         float[,,] splatMap2 = bottomTerrain.terrainData.GetAlphamaps(0, 0, splatWidth, splatHeight);    // Put the bottom terrains splatmap width and height into an array
+        float[,,] splatMap2End = bottomTerrain.terrainData.GetAlphamaps(0, 0, splatWidth, splatHeight); // Put the bottom terrains splatmap width and height into an array
 
         int numOfSplats = terrain.terrainData.terrainLayers.Length;                                     // Set number of splats available equal to the terrainlayers length (6)
         int ySplatMapPart = (int)(splatHeight * 0.02f);                                                 // Blend the splatmaps from both terrains at 0.02 from join
@@ -706,19 +697,19 @@ public class MapGenerator : MonoBehaviour
                 for (int j = 0; j < numOfSplats; j++)
                 {
                     // Update splatmap based on propotion of original side and other side of seam
-                    splatMap1[y, x, j] = propotionOfOriginal * splatMap1[(int)(propotionOfOriginal * ySplatMapPart), x, j] +
+                    splatMap1End[y, x, j] = propotionOfOriginal * splatMap1[(int)(propotionOfOriginal * ySplatMapPart), x, j] +
                                          propotionOfTarget * splatMap2[splatHeight - 1 - (int)(propotionOfTarget * ySplatMapPart), x, j];
 
                     // Repeat for splatmap on other side of seam
-                    splatMap2[splatHeight - 1 - y, x, j] = propotionOfTarget * splatMap1[(int)(propotionOfTarget * ySplatMapPart), x, j] +
+                    splatMap2End[splatHeight - 1 - y, x, j] = propotionOfTarget * splatMap1[(int)(propotionOfTarget * ySplatMapPart), x, j] +
                                                            propotionOfOriginal * splatMap2[splatHeight - 1 - (int)(propotionOfOriginal * ySplatMapPart), x, j];
                 }
             }
         }
         // Apply terrain splatmap
-        terrain.terrainData.SetAlphamaps(0, 0, splatMap1);
+        terrain.terrainData.SetAlphamaps(0, 0, splatMap1End);
         // Apply bottom terrain splatmap
-        bottomTerrain.terrainData.SetAlphamaps(0, 0, splatMap2);
+        bottomTerrain.terrainData.SetAlphamaps(0, 0, splatMap2End);
 
     }
 
@@ -846,14 +837,11 @@ public class MapGenerator : MonoBehaviour
         terrain.terrainData.SetAlphamaps(0, 0, splatMap1);
         // Apply bottom terrain splatmap
         leftTerrain.terrainData.SetAlphamaps(0, 0, splatMap2);
-
     }
 
     public void StitchBottomSeam(Terrain terrain, Terrain terrainBottom)
     {
         TerrainData terrainData = terrain.terrainData;
-        //Tidy up seam edges
-        //_nextTerrain.bottomNeighbor
 
         float[,] startStitchValues1 = terrainData.GetHeights(1, 0, terrainData.heightmapWidth-2, 2);   // Put current stitch values to into an array (terrain)
         float[,] endStitchValues1 = new float[1, terrainData.heightmapWidth-2];                        // Create array to store new heights for the end of the stitch (terrain)
@@ -877,8 +865,9 @@ public class MapGenerator : MonoBehaviour
     public void StitchRightSeam(Terrain terrain, Terrain rightTerrain)
     {
         TerrainData terrainData = terrain.terrainData;
-        float[,] startStitchValues1 = terrainData.GetHeights(terrainData.heightmapWidth - 2, 1, 2, terrainData.heightmapHeight-2);   // Put current stitch values to into an array (terrain)
-        float[,] endStitchValues1 = new float[terrainData.heightmapHeight-2, 1];                        // Create array to store new heights for the end of the stitch (terrain)
+
+        float[,] startStitchValues1 = terrainData.GetHeights(terrainData.heightmapWidth - 2, 1, 2, terrainData.heightmapHeight - 2);   // Put current stitch values to into an array (terrain)
+        float[,] endStitchValues1 = new float[terrainData.heightmapHeight - 2, 1];                        // Create array to store new heights for the end of the stitch (terrain)
 
         //// Start stitch values for right terrain, xbase and ybase both 0 as array starts at bottom left of the right terrain
         float[,] startStitchValues2 = rightTerrain.terrainData.GetHeights(0, 1, 2, terrainData.heightmapHeight-2);
@@ -986,6 +975,7 @@ public class MapGenerator : MonoBehaviour
     public void SmoothCorner(Terrain terrain, int xSize, int ySize, int left, int bottom)
     {
         TerrainData terrainData = terrain.terrainData;
+        
         // Get current values of bottom 10% of heights to be smoothed
         float[,] startValues = terrainData.GetHeights(left, bottom, xSize, ySize);  // Put current heights into array (x and y goes in reverse)
         float[,] endValues = new float[ySize, xSize];                               // Create array for new heights
@@ -1003,11 +993,11 @@ public class MapGenerator : MonoBehaviour
 
                 //New Bit
                 target = startValues[y, 0];
-                influenceY1 = 1 - Mathf.SmoothStep(0f, 1f, distToY1 / (xSize));
+                influenceY1 = 1 - Mathf.SmoothStep(0f, 1f, distToY1 / (xSize)); // SmoothStep interpolates between 0 and 1 smoothing at the limits giving a smooth curve line
                 influenceHeightY1 = target * influenceY1;
 
                 target = startValues[y, xSize - 1];
-                influenceY2 = 1 - Mathf.SmoothStep(0f, 1f, distToY2 / (xSize));
+                influenceY2 = 1 - Mathf.SmoothStep(0f, 1f, distToY2 / (xSize)); // SmoothStep interpolates between 0 and 1 smoothing at the limits giving a smooth curve line
                 influenceHeightY2 = target * influenceY2;
 
                 influenceY = Mathf.Max(influenceY1, influenceY2);
@@ -1021,11 +1011,11 @@ public class MapGenerator : MonoBehaviour
                 }
 
                 target = startValues[0, x];
-                influenceX1 = 1 - Mathf.SmoothStep(0f, 1f, distToX1 / (ySize));
+                influenceX1 = 1 - Mathf.SmoothStep(0f, 1f, distToX1 / (ySize)); // SmoothStep interpolates between 0 and 1 smoothing at the limits giving a smooth curve line
                 influenceHeightX1 = target * influenceX1;
 
                 target = startValues[ySize - 1, x];
-                influenceX2 = 1 - Mathf.SmoothStep(0f, 1f, distToX2 / (ySize));
+                influenceX2 = 1 - Mathf.SmoothStep(0f, 1f, distToX2 / (ySize)); // SmoothStep interpolates between 0 and 1 smoothing at the limits giving a smooth curve line
                 influenceHeightX2 = target * influenceX2;
 
                 influenceX = Mathf.Max(influenceX1, influenceX2);
@@ -1045,8 +1035,6 @@ public class MapGenerator : MonoBehaviour
         terrainData.SetHeights(left, bottom, endValues);
     }
 
-
-
     public float[,] SetPerlinNoise(int width, int height, NoiseValues _noiseValues, Vector2 sampleCentre, int seed)
     {
         float[,] map = new float[width, height];
@@ -1060,14 +1048,13 @@ public class MapGenerator : MonoBehaviour
         // Set values for max possible height, amplitude and frequency
         float maxPossibleHeight = 0;
         float amplitude = 1;
-        float frequency = 1;
 
         // Loop through octaves
         for (int i = 0; i < _noiseValues.octaves; i++)
         {
             // Randomise seed across the x and y axis between the values -100000, 100000
-            float sampleX = randomSeed.Next(-100000, 100000) + _noiseValues.offset.x + sampleCentre.x;
-            float sampleY = randomSeed.Next(-100000, 100000) + _noiseValues.offset.y + sampleCentre.y;
+            float sampleX = randomSeed.Next(-100000, 100000) + sampleCentre.x;
+            float sampleY = randomSeed.Next(-100000, 100000) + sampleCentre.y;
             setOctaves[i] = new Vector2(sampleX, sampleY);
 
             maxPossibleHeight += amplitude;
@@ -1089,7 +1076,7 @@ public class MapGenerator : MonoBehaviour
             {
                 // Reset amplitude and frequency to equal 1
                 amplitude = 1f;
-                frequency = 1;
+                float frequency = 1;
 
                 float perlinNoiseHeight = 0;
 
@@ -1133,7 +1120,7 @@ public class MapGenerator : MonoBehaviour
         float closeness;
 
         // Loop through height and width to calculate the edges of the terrains, to flatten edges
-        // This is done to reduce the gaps between the terrains so the stitching is so drastic
+        // This is done to reduce the gaps between the terrains so the stitching is not so drastic
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
@@ -1197,7 +1184,7 @@ public class NoiseValues
     public float persistance = 0.5f;
     public float lacunarity = 2;
     //public int seed;
-    public Vector2 offset;
+    //public Vector2 offset;
 
     // Function to declare validated values 
     public void ValidateValues()

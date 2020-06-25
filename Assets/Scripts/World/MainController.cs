@@ -85,9 +85,8 @@ public class MainController : MonoBehaviour
         {
             cameraNewY = startCameraHeight;
         }
-
         // Cap the amount of change per frame to 0.01 this stops dramatic changes to the camera angle
-        if (cameraNewY > _camera.transform.localPosition.y + 0.01f)
+        else if (cameraNewY > _camera.transform.localPosition.y + 0.01f)
         {
             cameraNewY = _camera.transform.localPosition.y + 0.01f;
         }

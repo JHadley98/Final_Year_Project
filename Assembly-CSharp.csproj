@@ -68,7 +68,6 @@
     <Compile Include="Assets\Scripts\Procedural_Generation\MapGenerator.cs" />
     <Compile Include="Assets\Scripts\Procedural_Generation\TerrainAssetGenerator.cs" />
     <Compile Include="Assets\Scripts\Procedural_Generation\TextureGenerator.cs" />
-    <Compile Include="Assets\Scripts\World\GameWorld.cs" />
     <Compile Include="Assets\Scripts\World\MainController.cs" />
     <None Include="Assets\Terrain\TerrainTextures\Read Me.txt" />
     <Reference Include="Unity.Timeline.Editor">
