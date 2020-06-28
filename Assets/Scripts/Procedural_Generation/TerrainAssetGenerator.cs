@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -24,7 +25,7 @@ public class TerrainAssetGenerator : MonoBehaviour
         Instantiate(water, new Vector3(_terrain.terrainData.size.x / 2 + _terrain.transform.position.x, 6, _terrain.terrainData.size.z / 2 + _terrain.transform.position.z), Quaternion.identity);
     }
 
-    public void CreateGrass(Terrain _terrain)
+    public IEnumerator CreateGrass(Terrain _terrain, int terrainCount)
     {
         // Dry colour = R: 205, G: 188, B: 16, A: 255, convert to decimal divide by 255 as ranges needs to be 0 - 1 instead of range 0 - 255
         // Dry colour in decimals then equals new colour (R: 0.8f, G: 0.73f, B: 0.06, A: 1)
@@ -53,7 +54,7 @@ public class TerrainAssetGenerator : MonoBehaviour
                 if (terrainHeight > 8 && terrainHeight < 17)
                 {
                     // Set detail frequency for the grass
-                    details[x, z] = 256;
+                    details[x, z] = 16;
                 }
                 // Else don't paint grass on to terrain
                 else
@@ -61,8 +62,17 @@ public class TerrainAssetGenerator : MonoBehaviour
                     details[x, z] = 0;
                 }
             }
+            // yield used every 50 x's to maintain performance of player
+            if (((float)x / 50 == x / 50) && terrainCount >= 9)
+            {
+                yield return null;
+            }
         }
 
+        if (terrainCount >= 9)
+        {
+            yield return null;
+        }
         _terrain.terrainData.SetDetailLayer(0, 0, 0, details);  // Set detail layer
         _terrain.terrainData.RefreshPrototypes();               // Refresh all available prototypes in the terrain object
     }
@@ -77,16 +87,16 @@ public class TerrainAssetGenerator : MonoBehaviour
         detail.prototypeTexture = texture2D;
         detail.dryColor = dryColour;
         detail.healthyColor = healthyColour;
-        detail.noiseSpread = 5.0f;
-        detail.minWidth = 1;
-        detail.minWidth = 2;
-        detail.minHeight = 0.25f;
-        detail.maxHeight = 0.5f;
+        detail.noiseSpread = 0.1f;
+        detail.minWidth = 0.5f;
+        detail.maxWidth = 1;
+        detail.minHeight = 0.1f;
+        detail.maxHeight = 0.2f;
         detail.renderMode = DetailRenderMode.GrassBillboard;
         return detail;
     }
 
-    public void CreateTrees(Terrain _terrain)
+    public IEnumerator CreateTrees(Terrain _terrain, int terrainCount)
     {
         // Delete existing trees
         List<TreeInstance> treeInstances = new List<TreeInstance>(0);
@@ -167,6 +177,11 @@ public class TerrainAssetGenerator : MonoBehaviour
                         _collider.GetComponent<CapsuleCollider>().radius = 0.2f;    // Set capsule collider radius applied to trees equal to 0.2
                     }
                 }
+            }
+            // yield used every 50 x's to maintain performance of player
+            if (x / 50 == (int)x / 50 && terrainCount >= 9)
+            {
+                yield return null;
             }
         }
     }

@@ -5,18 +5,13 @@ public class MainController : MonoBehaviour
     private Terrain _terrain;
 
     public GameObject _player;
-
     private Camera _camera;
-
     public MapGenerator _mapGenerator;
 
-    public float minCameraHeight;
-    public float startCameraHeight;
-    private float startBuildTime = 0f;
-
+    public float minCameraHeight;       //This is the minimum height above the terrain that the camera can be
+    public float startCameraHeight;     //This is the target height for the camera
     private Terrain prevTerrain;
 
-    public bool terrainsNeeded;
 
     // Start is called before the first frame update
     void Start()
@@ -24,24 +19,17 @@ public class MainController : MonoBehaviour
         _camera = Camera.main;
         _terrain = GetTerrain(_camera.transform.position);
         prevTerrain = _terrain;
-        terrainsNeeded = false;
     }
 
     // Update is called once per frame
     void Update()
     {
-        // Get terrains position to equal the camera position
+        // Get terrain that the camera is on
         _terrain = GetTerrain(_camera.transform.position);
 
-        //Check if terrain has changed from previous one
+        //Check if terrain has changed from previous one, if so then make sure new terrain has surrounding terrains
         if (_terrain != prevTerrain)
         {
-            terrainsNeeded = true;
-        }
-        // If terrain is needed build new terrain, 1 at time with a 2 second delay between each generation of terrain
-        if (terrainsNeeded == true && Time.time - startBuildTime > 2f)
-        {
-            startBuildTime = Time.time;
             _mapGenerator.CreateEndlessTerrain(_terrain.GetComponent<Terrain>());
         }
 
@@ -52,12 +40,12 @@ public class MainController : MonoBehaviour
         // Check camera height
         if (_camera.transform.position.y < terrainHeight + minCameraHeight)
         {
-            //Move up
+            //If the camera is too low then Move up
             ChangeCameraHeight();
         }
         else if (_camera.transform.localPosition.y > startCameraHeight)
         {
-            // Move down
+            // If the camera has been high previously then Move down
             ChangeCameraHeight();
         }
     }
@@ -79,22 +67,24 @@ public class MainController : MonoBehaviour
             cameraNewY = terrainHeight + minCameraHeight - _player.transform.position.y;
         }
 
-
-        // If camera position is lower than player then keep camera position in line with player
-        if (cameraNewY < startCameraHeight)
+        //Smooth the movement of the camera when going over hills, but don't smooth if going underwater
+        if (terrainHeight > 7)
         {
-            cameraNewY = startCameraHeight;
+            // If camera position is lower than player then keep camera position in line with player
+            if (cameraNewY < startCameraHeight)
+            {
+                cameraNewY = startCameraHeight;
+            }
+            // Cap the amount of change per frame to 0.01 this stops dramatic changes to the camera angle
+            else if (cameraNewY > _camera.transform.localPosition.y + 0.01f)
+            {
+                cameraNewY = _camera.transform.localPosition.y + 0.01f;
+            }
+            else if (cameraNewY < _camera.transform.localPosition.y - 0.01f)
+            {
+                cameraNewY = _camera.transform.localPosition.y - 0.01f;
+            }
         }
-        // Cap the amount of change per frame to 0.01 this stops dramatic changes to the camera angle
-        else if (cameraNewY > _camera.transform.localPosition.y + 0.01f)
-        {
-            cameraNewY = _camera.transform.localPosition.y + 0.01f;
-        }
-        else if (cameraNewY < _camera.transform.localPosition.y - 0.01f)
-        {
-            cameraNewY = _camera.transform.localPosition.y - 0.01f;
-        }
-
         _camera.transform.localPosition = new Vector3(_camera.transform.localPosition.x, cameraNewY, _camera.transform.localPosition.z);
 
         //Move camera's angle

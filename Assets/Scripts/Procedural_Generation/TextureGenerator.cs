@@ -35,23 +35,18 @@ public class TextureGenerator : MonoBehaviour
     }
 
     // Map function
-    // Takes a value then wants to know that original values range
-    // Between the min and max
-    // Then you give it the new range that it will go through
+    // Takes an original value between minValue and maxValue 
+    //and then returns a new value on a like for like basis between minRange and maxRange
     public float Map(float value, float minValue, float maxValue, float minRange, float maxRange)
     {
         return (value - minValue) * (maxRange - minRange) / (maxValue - minValue) + minRange;
     }
 
-    private IEnumerator coroutine;
-    public void splatMapCaller(Terrain _terrain, int splatNumber)
-    {
-        coroutine = SplatMap(_terrain, splatNumber);
-        StartCoroutine(coroutine);
-    }
 
-    public IEnumerator SplatMap(Terrain _terrain, int splatNumber)
+    public IEnumerator SplatMap(Terrain _terrain, int terrainNumber)
     {
+        ////Create a splatmap across terrain based on heights and the layers available
+
         TerrainData _terrainData = _terrain.terrainData;
 
         // 3D float array for the alpha width and height and the number of layers add to the terrain
@@ -114,8 +109,8 @@ public class TextureGenerator : MonoBehaviour
                     splatmapData[x, y, j] = splatMap[j];
                 }
             }
-
-            if (splatNumber >= 10)
+            // yield used every 20 y's to maintain performance of player
+            if ((float)y / 20 == y / 20 && terrainNumber >= 9)
             {
                 yield return null;
             }
