@@ -72,7 +72,6 @@ public class MapGenerator : MonoBehaviour
 
     void Start()
     {
-
         // Creates default terrain data to equal current terrain data
         defaultTD = _terrain.terrainData;
         //Set initial values
@@ -82,7 +81,6 @@ public class MapGenerator : MonoBehaviour
         StartCoroutine(UpdateTerrainCoroutine(_terrain));
         //Add initial terrain to updated list
         terrainsUpdated.Add(_terrain);
-
 
         // CreateEndlessTerrain is called to create new terrains around this one
         // CreateEndlessTerrain will loop through ensuring the player is always in a 3x3 terrain grid
@@ -104,10 +102,8 @@ public class MapGenerator : MonoBehaviour
             //set in progress flag to true and start the update process
             TerrainUpdateInProgress = true;
             StartCoroutine(UpdateTerrains());
-
         }
     }
-
 
     public void CreateEndlessTerrain(Terrain centreTerrain)
     {
@@ -247,7 +243,6 @@ public class MapGenerator : MonoBehaviour
         if (terrainTopFound == true)
         {
             StitchToTop(_nextTerrain, terrainTop);
-
             // Add neighbour to set neighbours
             _nextTerrain.SetNeighbors(_nextTerrain.leftNeighbor, terrainTop, _nextTerrain.rightNeighbor, _nextTerrain.bottomNeighbor);
             // Add the new terrain to the existing terrain neighbours
@@ -330,7 +325,6 @@ public class MapGenerator : MonoBehaviour
             StartCoroutine(_textureGenerator.SplatMap(_nextTerrain, terrainCount));
         }
 
-
         //// Blend splatmap edges with neighbors if the terrains are found
         if (terrainBottomFound == true)
         {
@@ -342,7 +336,6 @@ public class MapGenerator : MonoBehaviour
             {
                 StartCoroutine(SplatBlendBottom(_nextTerrain, terrainBottom));
             }
-
         }
         if (terrainRightFound == true)
         {
@@ -354,7 +347,6 @@ public class MapGenerator : MonoBehaviour
             {
                 StartCoroutine(SplatBlendRight(_nextTerrain, terrainRight));
             }
-
         }
         if (terrainTopFound == true)
         {
@@ -366,7 +358,6 @@ public class MapGenerator : MonoBehaviour
             {
                 StartCoroutine(SplatBlendTop(_nextTerrain, terrainTop));
             }
-
         }
         if (terrainLeftFound == true)
         {
@@ -378,7 +369,6 @@ public class MapGenerator : MonoBehaviour
             {
                 StartCoroutine(SplatBlendLeft(_nextTerrain, terrainLeft));
             }
-
         }
 
         // Create tress across endless terrain
@@ -405,8 +395,9 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-
-
+    /// <summary>
+    /// Start stitch code section
+    /// </summary>
     public void StitchToBottom(Terrain terrain, Terrain bottomTerrain, bool leftTerrainFound, bool rightTerrainFound)
     {
         /// Step 1:
@@ -423,7 +414,6 @@ public class MapGenerator : MonoBehaviour
         // Stitch with other terrain by setting same heightmap values on the edge
         terrainData.SetHeights(0, 0, edgeValues);
 
-        /// 
         /// Step 2: 
         /// Blend 10% of heights in new terrain to the height of the first row of the new terrain
         /// First row of the new terrain is the same as bottom terrain
@@ -505,7 +495,6 @@ public class MapGenerator : MonoBehaviour
         // Stitch with other terrain by setting same heightmap values on the edge
         terrainData.SetHeights(0, terrainData.heightmapWidth - 1, edgeValues);
 
-        /// 
         /// Step 2: 
         /// Blend 10% of heights in new terrain to the height of the first row of the new terrain
         /// First row of the new terrain is the same as bottom terrain
@@ -580,7 +569,6 @@ public class MapGenerator : MonoBehaviour
         // Stitch with other terrain by setting same heightmap values on the edge
         terrainData.SetHeights(resolution - 1, 0, edgeValues);
 
-        /// 
         /// Step 2: 
         /// Blend 10% of heights in new terrain to the height of the first row of the new terrain
         /// First row of the new terrain is the same as bottom terrain
@@ -665,7 +653,6 @@ public class MapGenerator : MonoBehaviour
         // Stitch with other terrain by setting same heightmap values on the edge
         terrainData.SetHeights(0, 0, edgeValues);
 
-        /// 
         /// Step 2: 
         /// Blend 10% of heights in new terrain to the height of the first row of the new terrain
         /// First row of the new terrain is the same as bottom terrain
@@ -707,7 +694,7 @@ public class MapGenerator : MonoBehaviour
 
             for (int x = 0; x < xSize; x++)
             {
-                // propotionOfOriginal = Mathf.InverseLerp(0, blendLimit, x);  // InverseLerp gives a decimal 0 to 1 of where X is from 0 to blend limit
+                // propotionOfOriginal = Mathf.InverseLerp(0, blendLimit, x);   // InverseLerp gives a decimal 0 to 1 of where X is from 0 to blend limit
                 propotionOfOriginal = Mathf.SmoothStep(0f, 1f, x / blendLimit); // SmoothStep interpolates between 0 and 1 smoothing at the limits giving a smooth curve line
 
                 if (propotionOfOriginal > 1)                                // Propotion of the original cannot be more than 1
@@ -729,8 +716,6 @@ public class MapGenerator : MonoBehaviour
     /// <summary>
     /// Start of blending section of code
     /// </summary>
-
-
     public IEnumerator SplatBlendBottom(Terrain terrain, Terrain bottomTerrain)
     {
         TerrainData terrainData = terrain.terrainData;
@@ -963,14 +948,10 @@ public class MapGenerator : MonoBehaviour
         leftTerrain.terrainData.SetAlphamaps(0, 0, splatMap2);
     }
 
-
-
     /// <summary>
     /// Start of stitching section of code
     /// Smooths on the join itself
     /// </summary>
-
-
     public void StitchBottomSeam(Terrain terrain, Terrain terrainBottom)
     {
         TerrainData terrainData = terrain.terrainData;
@@ -1129,6 +1110,7 @@ public class MapGenerator : MonoBehaviour
                 target = startValues[y, 0];
                 influenceY1 = 1 - Mathf.SmoothStep(0f, 1f, distToY1 / (xSize)); // SmoothStep interpolates between 0 and 1 smoothing at the limits giving a smooth curve line
                 influenceHeightY1 = target * influenceY1;
+                
                 //Work out influence from right side
                 target = startValues[y, xSize - 1];
                 influenceY2 = 1 - Mathf.SmoothStep(0f, 1f, distToY2 / (xSize)); // SmoothStep interpolates between 0 and 1 smoothing at the limits giving a smooth curve line
@@ -1150,6 +1132,7 @@ public class MapGenerator : MonoBehaviour
                 target = startValues[0, x];
                 influenceX1 = 1 - Mathf.SmoothStep(0f, 1f, distToX1 / (ySize)); // SmoothStep interpolates between 0 and 1 smoothing at the limits giving a smooth curve line
                 influenceHeightX1 = target * influenceX1;
+                
                 //Work out influence from top side
                 target = startValues[ySize - 1, x];
                 influenceX2 = 1 - Mathf.SmoothStep(0f, 1f, distToX2 / (ySize)); // SmoothStep interpolates between 0 and 1 smoothing at the limits giving a smooth curve line
@@ -1165,7 +1148,6 @@ public class MapGenerator : MonoBehaviour
                 {
                     influenceXHeight = (influenceHeightX1 + influenceHeightX2) + startValues[y, x] / (1 - influenceX1 - influenceX2);
                 }
-
 
                 //Work out influence from top/bottom and left/right 
                 influenceY = Mathf.Max(influenceY1, influenceY2);
@@ -1322,8 +1304,11 @@ public class MapGenerator : MonoBehaviour
         _terrainData.SetHeights(0, 0, map);
     }
 
-
-
+    /// <summary>
+    /// Inititial variables used to calculate the centre of the terrain,
+    /// set the surrounding terrains using the default terrain data and
+    /// set the positions for the neighbouring terrains using the default terrain data
+    /// </summary>
     private void InitialVariables(TerrainData defaultTD)
     {
         // Calculate center of terrain
@@ -1351,31 +1336,23 @@ public class MapGenerator : MonoBehaviour
     }
 }
 
-
-
 [System.Serializable]
 public class NoiseValues
 {
-    //public MapGenerator.NormaliseMode _normaliseMode;
-
     public float scale = 250;
     public int octaves = 6;
     [Range(0, 1)]
     public float persistance = 0.5f;
     public float lacunarity = 2;
-    //public int seed;
-    //public Vector2 offset;
-
+ 
     // Function to declare validated values 
     public void ValidateValues()
     {
         // Max function used to choose whichever is greater, so if the scale is less than 0.01 then the value will be set to 0.01
         // The max function will be apply the same functions to octaves and lacunarity
         scale = Mathf.Max(scale, 0.01f);
-        scale = Mathf.Max(scale, 0.01f);
         octaves = Mathf.Max(octaves, 1);
         lacunarity = Mathf.Max(lacunarity, 1);
-        // Clamp persistance between 0 and 1
-        persistance = Mathf.Clamp01(persistance);
+        persistance = Mathf.Clamp01(persistance);   // Clamp persistance between 0 and 1
     }
 }
