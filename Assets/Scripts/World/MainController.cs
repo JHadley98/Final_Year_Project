@@ -5,7 +5,8 @@ public class MainController : MonoBehaviour
     private Terrain _terrain;
 
     public GameObject _player;
-    private Camera _camera;
+    public Camera _camera;
+    public Camera topDownCamera;
     public MapGenerator _mapGenerator;
 
     public float minCameraHeight;       //This is the minimum height above the terrain that the camera can be
@@ -16,7 +17,11 @@ public class MainController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _camera = Camera.main;
+        //_camera = Camera.main;
+
+        _camera.enabled = true;
+        topDownCamera.enabled = false;
+
         _terrain = GetTerrain(_camera.transform.position);
         prevTerrain = _terrain;
     }
@@ -24,6 +29,12 @@ public class MainController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            _camera.enabled = !_camera.enabled;
+            topDownCamera.enabled = !topDownCamera.enabled;
+        }
+
         // Get terrain that the camera is on
         _terrain = GetTerrain(_camera.transform.position);
 

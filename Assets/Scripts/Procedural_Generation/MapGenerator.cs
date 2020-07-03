@@ -31,8 +31,9 @@ public class MapGenerator : MonoBehaviour
     public int numOfTerrains;                                           // Set number of terrains, used to change how many possible heightmap and splatmaps are used
 
     private int terrainCount = 1;                                       //Count of terrains created
-    private List<Terrain> terrainsToUpdate = new List<Terrain>();       //List of terrains created that need updating
+    private List<Terrain> terrainsToBeUpdated = new List<Terrain>();       //List of terrains created that need updating
     private List<Terrain> terrainsUpdated = new List<Terrain>();        //List of terrains created and updated
+    private List<Terrain> terrainsBeingUpdated = new List<Terrain>();    //List of terrains being that need updating
     private bool TerrainUpdateInProgress = false;                       //Flag to show if terrains are being updated
 
     private bool terrainFound;  // Check if terrain is found when checking around the current terrain the player is on
@@ -85,6 +86,14 @@ public class MapGenerator : MonoBehaviour
         // CreateEndlessTerrain is called to create new terrains around this one
         // CreateEndlessTerrain will loop through ensuring the player is always in a 3x3 terrain grid
         CreateEndlessTerrain(_terrain);
+
+        // Loop through terrains to be updated
+        foreach (Terrain terrain in terrainsToBeUpdated)
+        {
+            // Add terrain to list of terrains being updated (this prevents being added to the list while the list is being worked through)
+            terrainsBeingUpdated.Add(terrain);
+        }
+
         // Update terrains just created
         StartCoroutine(UpdateTerrains());
     }
@@ -92,12 +101,17 @@ public class MapGenerator : MonoBehaviour
     private void Update()
     {
         //If there are terrains to be updated and this is not started then trigger the update
-        if (TerrainUpdateInProgress == false && terrainsToUpdate.Count > 0)
+        if (TerrainUpdateInProgress == false && terrainsToBeUpdated.Count > 0)
         {
+            terrainsBeingUpdated.Clear();
             //clear out updated terrains from list of terrains to update
             foreach (Terrain _nextTerrain in terrainsUpdated)
             {
-                terrainsToUpdate.Remove(_nextTerrain);
+                terrainsToBeUpdated.Remove(_nextTerrain);
+            }
+            foreach (Terrain terrain in terrainsToBeUpdated)
+            {
+                terrainsBeingUpdated.Add(terrain);
             }
             //set in progress flag to true and start the update process
             TerrainUpdateInProgress = true;
@@ -151,14 +165,14 @@ public class MapGenerator : MonoBehaviour
             _nextTerrain.terrainData.SetDetailResolution(defaultTD.detailResolution, defaultTD.detailResolutionPerPatch);
 
             //Add new terrain to the ToUpdate list for heights, splats, trees, grass etc.
-            terrainsToUpdate.Add(_nextTerrain);
+            terrainsToBeUpdated.Add(_nextTerrain);
         }
     }
 
     public IEnumerator UpdateTerrains()
     {
         //// Work through list of terrains to update, updating 1 terrain at a time
-        foreach (Terrain _nextTerrain in terrainsToUpdate)
+        foreach (Terrain _nextTerrain in terrainsBeingUpdated)
         {
             if (terrainCount >= 9)
             {
