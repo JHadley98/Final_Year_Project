@@ -2,7 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Height map and noise class
+/// <summary>
+/// This class is used to generate to map, using a Perlin Noise for the height map,
+/// creating endless terrain, stitching the terrains together to create the feel of one large terrain
+/// and blending the splat textures when stitching terrains together
+/// </summary>
 
 public class MapGenerator : MonoBehaviour
 {
@@ -14,8 +18,6 @@ public class MapGenerator : MonoBehaviour
     public TextureGenerator _textureGenerator;
     public MainController _mainController;
     public TerrainAssetGenerator _terrainAssetGenerator;
-
-
 
     private TerrainData defaultTD;          // Default terrain data, used to store the values for the initial terrain
     private GameObject nextTerrainChunk;    // Create next terrain chunk
@@ -30,11 +32,11 @@ public class MapGenerator : MonoBehaviour
 
     public int numOfTerrains;                                           // Set number of terrains, used to change how many possible heightmap and splatmaps are used
 
-    private int terrainCount = 1;                                       //Count of terrains created
-    private List<Terrain> terrainsToBeUpdated = new List<Terrain>();       //List of terrains created that need updating
-    private List<Terrain> terrainsUpdated = new List<Terrain>();        //List of terrains created and updated
-    private List<Terrain> terrainsBeingUpdated = new List<Terrain>();    //List of terrains being that need updating
-    private bool TerrainUpdateInProgress = false;                       //Flag to show if terrains are being updated
+    private int terrainCount = 1;                                       // Count of terrains created
+    private List<Terrain> terrainsToBeUpdated = new List<Terrain>();    // List of terrains created that need updating
+    private List<Terrain> terrainsUpdated = new List<Terrain>();        // List of terrains created and updated
+    private List<Terrain> terrainsBeingUpdated = new List<Terrain>();   // List of terrains being that need updating
+    private bool TerrainUpdateInProgress = false;                       // Flag to show if terrains are being updated
 
     private bool terrainFound;  // Check if terrain is found when checking around the current terrain the player is on
 
@@ -182,8 +184,8 @@ public class MapGenerator : MonoBehaviour
             {
                 StartCoroutine(UpdateTerrainCoroutine(_nextTerrain));
             }
-            //TerrainCount is used to run process without delay for the initial 3x3 terrains 
-            //and then with delays using yield in Coroutine for terrains after that to maintain player performance
+            // TerrainCount is used to run process without delay for the initial 3x3 terrains 
+            // and then with delays using yield in Coroutine for terrains after that to maintain player performance
             terrainCount++;
             terrainsUpdated.Add(_nextTerrain);
         }
@@ -327,8 +329,8 @@ public class MapGenerator : MonoBehaviour
             yield return null;
         }
 
-        //When doing normal run need to use yield to maintain order of updates and performance
-        //when doing initial terrain generations need to do without yield so everything gets done before start of game
+        // When doing normal run need to use yield to maintain order of updates and performance
+        // when doing initial terrain generations need to do without yield so everything gets done before start of game
         // Update entire splatmap to reflect the change in heights
         if (terrainCount >= 9)
         {

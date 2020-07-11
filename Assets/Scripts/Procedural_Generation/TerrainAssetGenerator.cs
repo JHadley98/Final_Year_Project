@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Class is used to generate the terrain assets as followed:
+/// This class is used to generate the terrain assets as followed:
 /// Three different tree types across different heights throughout the terrain
 /// Grass assets above the grass textures
 /// Water objects that will be above sand sections of the terrain making mini beaches/lakes
@@ -119,13 +119,13 @@ public class TerrainAssetGenerator : MonoBehaviour
                 terrainHeight = _terrain.terrainData.GetHeight((int)(x * _terrain.terrainData.heightmapWidth / _terrain.terrainData.size.x),
                                                                (int)(z * _terrain.terrainData.heightmapHeight / _terrain.terrainData.size.z));
 
-                // If terrain is greater than 5 or less than 20 then place tree between them heights
-                if (randomGrouping < 200 && terrainHeight >= 6 && terrainHeight <= 19)
+                // If terrain is greater than the set height or less than set height then place tree between them heights
+                if (randomGrouping < 150 && terrainHeight >= 6 && terrainHeight <= 19)
                 {
                     treeMade = false;
 
-                    // Set terrain height and tree density, if a tree is between them heights and has that density create 1 of 3 tree types based on terrain height and tree density
-                    if (terrainHeight <= 9 && treeDensity <= 60)
+                    // Set terrain height and tree density(these values can be changed), if a tree is between them heights and has that density create 1 of 3 tree types based on terrain height and tree density
+                    if (terrainHeight <= 8 && treeDensity <= 20)
                     {
                         treeInstance = new TreeInstance();  // Create trees
                         treeInstance.prototypeIndex = 0;    // Create palm trees
@@ -134,7 +134,7 @@ public class TerrainAssetGenerator : MonoBehaviour
                         treeInstance.heightScale = 0.7f;
                         treeMade = true;
                     }
-                    else if (terrainHeight <= 14 && treeDensity <= 30)
+                    else if (terrainHeight >= 11 && terrainHeight <= 14 && treeDensity <= 25)
                     {
                         treeInstance = new TreeInstance();  // Create trees
                         treeInstance.prototypeIndex = 1;    // Create broad leaf trees trees
@@ -143,7 +143,7 @@ public class TerrainAssetGenerator : MonoBehaviour
                         treeInstance.heightScale = 0.3f;
                         treeMade = true;
                     }
-                    else if (terrainHeight >= 13 && treeDensity >= 30 && treeDensity <= 60)
+                    else if (terrainHeight >= 15 && treeDensity >= 5 && treeDensity <= 10)
                     {
                         treeInstance = new TreeInstance();  // Create trees
                         treeInstance.prototypeIndex = 2;    // Create conifer trees

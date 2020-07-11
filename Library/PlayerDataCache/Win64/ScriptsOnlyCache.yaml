@@ -3,7 +3,6 @@ ScriptsOnlyBuild:
     Assembly-CSharp-firstpass.dll:
     - UnityStandardAssets.Characters.ThirdPerson.ThirdPersonCharacter
     - UnityStandardAssets.Characters.ThirdPerson.ThirdPersonUserControl
-    - UnityStandardAssets.Water.Water
     Assembly-CSharp.dll:
     - LevelLoader
     - MainController
@@ -11,6 +10,7 @@ ScriptsOnlyBuild:
     - PauseMenu
     - TerrainAssetGenerator
     - TextureGenerator
+    - UnityStandardAssets.Water.Water
     Unity.TextMeshPro.dll:
     - TMPro.TMP_ColorGradient
     - TMPro.TMP_FontAsset
@@ -18,8 +18,6 @@ ScriptsOnlyBuild:
     - TMPro.TMP_SpriteAsset
     - TMPro.TMP_StyleSheet
     - TMPro.TextMeshProUGUI
-    UnityEditor.TestRunner.dll:
-    - UnityEditor.TestTools.TestRunner.TestListCacheData
     UnityEngine.UI.dll:
     - UnityEngine.EventSystems.EventSystem
     - UnityEngine.EventSystems.StandaloneInputModule
@@ -66,39 +64,39 @@ ScriptsOnlyBuild:
     - Class: 108
       Script: {instanceID: 0}
     - Class: 114
+      Script: {instanceID: 9434}
+    - Class: 114
       Script: {instanceID: 9436}
     - Class: 114
-      Script: {instanceID: 9438}
+      Script: {instanceID: 9442}
     - Class: 114
-      Script: {instanceID: 9444}
+      Script: {instanceID: 9448}
     - Class: 114
-      Script: {instanceID: 9450}
+      Script: {instanceID: 9456}
     - Class: 114
-      Script: {instanceID: 9458}
+      Script: {instanceID: 9492}
     - Class: 114
-      Script: {instanceID: 9494}
+      Script: {instanceID: 9844}
     - Class: 114
-      Script: {instanceID: 9846}
-    - Class: 114
-      Script: {instanceID: 9856}
+      Script: {instanceID: 9854}
     - Class: 114
       Script: {instanceID: 9928}
     - Class: 114
       Script: {instanceID: 9982}
     - Class: 114
-      Script: {instanceID: 10042}
+      Script: {instanceID: 10040}
     - Class: 114
-      Script: {instanceID: 10136}
+      Script: {instanceID: 10134}
     - Class: 114
-      Script: {instanceID: 10144}
+      Script: {instanceID: 10142}
     - Class: 114
-      Script: {instanceID: 10236}
+      Script: {instanceID: 10234}
+    - Class: 114
+      Script: {instanceID: 10282}
     - Class: 114
       Script: {instanceID: 10286}
     - Class: 114
-      Script: {instanceID: 10290}
-    - Class: 114
-      Script: {instanceID: 10600}
+      Script: {instanceID: 10594}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -163,29 +161,29 @@ ScriptsOnlyBuild:
     - Class: 109
       Script: {instanceID: 0}
     - Class: 114
-      Script: {instanceID: 9438}
+      Script: {instanceID: 9436}
     - Class: 114
-      Script: {instanceID: 9444}
+      Script: {instanceID: 9442}
     - Class: 114
-      Script: {instanceID: 9450}
+      Script: {instanceID: 9448}
     - Class: 114
-      Script: {instanceID: 9458}
+      Script: {instanceID: 9456}
     - Class: 114
-      Script: {instanceID: 9494}
+      Script: {instanceID: 9492}
     - Class: 114
-      Script: {instanceID: 9812}
+      Script: {instanceID: 9810}
     - Class: 114
-      Script: {instanceID: 10144}
+      Script: {instanceID: 9856}
     - Class: 114
-      Script: {instanceID: 10154}
+      Script: {instanceID: 10142}
     - Class: 114
-      Script: {instanceID: 10286}
+      Script: {instanceID: 10152}
     - Class: 114
-      Script: {instanceID: 10522}
+      Script: {instanceID: 10282}
     - Class: 114
-      Script: {instanceID: 10600}
+      Script: {instanceID: 10516}
     - Class: 114
-      Script: {instanceID: 14870}
+      Script: {instanceID: 10594}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -456,7 +454,7 @@ ScriptsOnlyBuild:
   - hash:
       serializedVersion: 2
       Hash: 357dc9516c87a9d2caf5c0f50c455e56
-    assemblyName: Assembly-CSharp-firstpass.dll
+    assemblyName: Assembly-CSharp.dll
     namespaceName: UnityStandardAssets.Water
     className: WaterBase
   - hash:
@@ -755,6 +753,12 @@ ScriptsOnlyBuild:
     className: ThirdPersonCharacter
   - hash:
       serializedVersion: 2
+      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: LevelLoader
+  - hash:
+      serializedVersion: 2
       Hash: 4bd1cc3c85989d2213a9a8fd9d09e63f
     assemblyName: Assembly-CSharp-firstpass.dll
     namespaceName: UnityStandardAssets.CrossPlatformInput
@@ -810,13 +814,13 @@ ScriptsOnlyBuild:
   - hash:
       serializedVersion: 2
       Hash: 14d684e5eb706041b258044f3a2d3861
-    assemblyName: Assembly-CSharp-firstpass.dll
+    assemblyName: Assembly-CSharp.dll
     namespaceName: UnityStandardAssets.Water
     className: PlanarReflection
   - hash:
       serializedVersion: 2
       Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
-    assemblyName: Assembly-CSharp-firstpass.dll
+    assemblyName: Assembly-CSharp.dll
     namespaceName: UnityStandardAssets.Water
     className: Displace
   - hash:
@@ -851,12 +855,6 @@ ScriptsOnlyBuild:
     className: ChatController
   - hash:
       serializedVersion: 2
-      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
-    assemblyName: Assembly-CSharp-firstpass.dll
-    namespaceName: UnityStandardAssets.Water
-    className: WaterBasic
-  - hash:
-      serializedVersion: 2
       Hash: c8c5e65e9fb858572516474d6e2102bc
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
@@ -870,7 +868,7 @@ ScriptsOnlyBuild:
   - hash:
       serializedVersion: 2
       Hash: 97a580c59cad3623a01bbf5fb2d7fa93
-    assemblyName: Assembly-CSharp-firstpass.dll
+    assemblyName: Assembly-CSharp.dll
     namespaceName: UnityStandardAssets.Water
     className: SpecularLighting
   - hash:
@@ -888,7 +886,7 @@ ScriptsOnlyBuild:
   - hash:
       serializedVersion: 2
       Hash: c239250f2f7641ce897064c7bd4173b0
-    assemblyName: Assembly-CSharp-firstpass.dll
+    assemblyName: Assembly-CSharp.dll
     namespaceName: UnityStandardAssets.Water
     className: Water
   - hash:
@@ -995,12 +993,6 @@ ScriptsOnlyBuild:
     className: TMP_TextInfoDebugTool
   - hash:
       serializedVersion: 2
-      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
-    assemblyName: Assembly-CSharp.dll
-    namespaceName: 
-    className: PlayerController
-  - hash:
-      serializedVersion: 2
       Hash: bd3f0ca738703903e759f77536ed74fd
     assemblyName: Assembly-CSharp.dll
     namespaceName: TMPro.Examples
@@ -1091,12 +1083,6 @@ ScriptsOnlyBuild:
     className: VertexColorCycler
   - hash:
       serializedVersion: 2
-      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
-    assemblyName: Assembly-CSharp.dll
-    namespaceName: 
-    className: EnemyAI
-  - hash:
-      serializedVersion: 2
       Hash: e63944317d2f5958e31963668bb29158
     assemblyName: Assembly-CSharp.dll
     namespaceName: TMPro.Examples
@@ -1104,7 +1090,7 @@ ScriptsOnlyBuild:
   - hash:
       serializedVersion: 2
       Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
-    assemblyName: Assembly-CSharp-firstpass.dll
+    assemblyName: Assembly-CSharp.dll
     namespaceName: UnityStandardAssets.Water
     className: GerstnerDisplace
   - hash:
@@ -1122,7 +1108,7 @@ ScriptsOnlyBuild:
   - hash:
       serializedVersion: 2
       Hash: 698812e8d71fd38ac0f66f7a70a25fb5
-    assemblyName: Assembly-CSharp-firstpass.dll
+    assemblyName: Assembly-CSharp.dll
     namespaceName: UnityStandardAssets.Water
     className: WaterTile
   - hash:
@@ -1185,15 +1171,9 @@ ScriptsOnlyBuild:
     assemblyName: Unity.Timeline.dll
     namespaceName: UnityEngine.Timeline
     className: PlayableTrack
-  - hash:
-      serializedVersion: 2
-      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
-    assemblyName: Assembly-CSharp.dll
-    namespaceName: 
-    className: LevelLoader
   platform: 19
   scenePathNames:
   - Assets/Scenes/LoadingScene.unity
   - Assets/Scenes/GameWorld.unity
   playerPath: C:/Users/james/Documents/Teesside University/Computer Games Programming/Year
-    3/FYP/Finished FYP/Final_Year_Project/ProceduralTerrainGeneration.exe
+    3/FYP/FYP_Submission/Final_Year_Project/ProceduralTerrainGeneration.exe

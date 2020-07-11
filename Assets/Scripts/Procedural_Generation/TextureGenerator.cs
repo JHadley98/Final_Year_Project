@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// This class is used to texture the terrain using splatmaps, applied at different heights of the terrain
+/// </summary>
 public class TextureGenerator : MonoBehaviour
 {
     [System.Serializable]

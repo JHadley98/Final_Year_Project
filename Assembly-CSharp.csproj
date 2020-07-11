@@ -63,14 +63,20 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\Enemy\EnemyAI.cs" />
-    <Compile Include="Assets\Scripts\Player\PlayerController.cs" />
+    <Compile Include="Assets\Scripts\Procedural_Generation\MainController.cs" />
     <Compile Include="Assets\Scripts\Procedural_Generation\MapGenerator.cs" />
     <Compile Include="Assets\Scripts\Procedural_Generation\TerrainAssetGenerator.cs" />
     <Compile Include="Assets\Scripts\Procedural_Generation\TextureGenerator.cs" />
     <Compile Include="Assets\Scripts\UI\LevelLoader.cs" />
     <Compile Include="Assets\Scripts\UI\PauseMenu.cs" />
-    <Compile Include="Assets\Scripts\World\MainController.cs" />
+    <Compile Include="Assets\TerrainAssets\Water\Water\Scripts\Displace.cs" />
+    <Compile Include="Assets\TerrainAssets\Water\Water\Scripts\GerstnerDisplace.cs" />
+    <Compile Include="Assets\TerrainAssets\Water\Water\Scripts\MeshContainer.cs" />
+    <Compile Include="Assets\TerrainAssets\Water\Water\Scripts\PlanarReflection.cs" />
+    <Compile Include="Assets\TerrainAssets\Water\Water\Scripts\SpecularLighting.cs" />
+    <Compile Include="Assets\TerrainAssets\Water\Water\Scripts\Water.cs" />
+    <Compile Include="Assets\TerrainAssets\Water\Water\Scripts\WaterBase.cs" />
+    <Compile Include="Assets\TerrainAssets\Water\Water\Scripts\WaterTile.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01_UGUI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark02.cs" />
@@ -108,14 +114,13 @@
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMPro_Properties.cginc" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_Bitmap-Custom-Atlas.shader" />
-    <None Include="Assets\Terrain\TerrainTextures\Read Me.txt" />
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Oswald-Bold - OFL.txt" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
-    <None Include="Assets\TextMesh Pro\Sprites\EmojiOne Attribution.txt" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Mobile Masking.shader" />
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Anton OFL.txt" />
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Bangers - OFL.txt" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_Bitmap-Mobile.shader" />
+    <None Include="Assets\TerrainAssets\Water\Water\Shaders\FXWaterPro.shader" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF Overlay.shader" />
     <None Include="Assets\TextMesh Pro\Fonts\LiberationSans - OFL.txt" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMPro_Surface.cginc" />
@@ -127,22 +132,22 @@
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_Sprite.shader" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Surface.shader" />
     <Reference Include="Unity.Timeline.Editor">
-      <HintPath>C:/Users/james/Documents/Teesside University/Computer Games Programming/Year 3/FYP/Finished FYP/Final_Year_Project/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
+      <HintPath>C:/Users/james/Documents/Teesside University/Computer Games Programming/Year 3/FYP/FYP_Submission/Final_Year_Project/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro.Editor">
-      <HintPath>C:/Users/james/Documents/Teesside University/Computer Games Programming/Year 3/FYP/Finished FYP/Final_Year_Project/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
+      <HintPath>C:/Users/james/Documents/Teesside University/Computer Games Programming/Year 3/FYP/FYP_Submission/Final_Year_Project/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Timeline">
-      <HintPath>C:/Users/james/Documents/Teesside University/Computer Games Programming/Year 3/FYP/Finished FYP/Final_Year_Project/Library/ScriptAssemblies/Unity.Timeline.dll</HintPath>
+      <HintPath>C:/Users/james/Documents/Teesside University/Computer Games Programming/Year 3/FYP/FYP_Submission/Final_Year_Project/Library/ScriptAssemblies/Unity.Timeline.dll</HintPath>
     </Reference>
     <Reference Include="Unity.CollabProxy.Editor">
-      <HintPath>C:/Users/james/Documents/Teesside University/Computer Games Programming/Year 3/FYP/Finished FYP/Final_Year_Project/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
+      <HintPath>C:/Users/james/Documents/Teesside University/Computer Games Programming/Year 3/FYP/FYP_Submission/Final_Year_Project/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>C:/Users/james/Documents/Teesside University/Computer Games Programming/Year 3/FYP/Finished FYP/Final_Year_Project/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
+      <HintPath>C:/Users/james/Documents/Teesside University/Computer Games Programming/Year 3/FYP/FYP_Submission/Final_Year_Project/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Analytics.DataPrivacy">
-      <HintPath>C:/Users/james/Documents/Teesside University/Computer Games Programming/Year 3/FYP/Finished FYP/Final_Year_Project/Library/ScriptAssemblies/Unity.Analytics.DataPrivacy.dll</HintPath>
+      <HintPath>C:/Users/james/Documents/Teesside University/Computer Games Programming/Year 3/FYP/FYP_Submission/Final_Year_Project/Library/ScriptAssemblies/Unity.Analytics.DataPrivacy.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AIModule">
       <HintPath>C:/Program Files/Unity/Hub/Editor/2019.1.11f1/Editor/Data/Managed/UnityEngine/UnityEngine.AIModule.dll</HintPath>
@@ -328,13 +333,13 @@
       <HintPath>C:/Program Files/Unity/Hub/Editor/2019.1.11f1/Editor/Data/UnityExtensions/Unity/TestRunner/net35/unity-custom/nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Analytics.Editor">
-      <HintPath>C:/Users/james/Documents/Teesside University/Computer Games Programming/Year 3/FYP/Finished FYP/Final_Year_Project/Library/PackageCache/com.unity.analytics@3.3.5/Unity.Analytics.Editor.dll</HintPath>
+      <HintPath>C:/Users/james/Documents/Teesside University/Computer Games Programming/Year 3/FYP/FYP_Submission/Final_Year_Project/Library/PackageCache/com.unity.analytics@3.3.5/Unity.Analytics.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Analytics.Tracker">
-      <HintPath>C:/Users/james/Documents/Teesside University/Computer Games Programming/Year 3/FYP/Finished FYP/Final_Year_Project/Library/PackageCache/com.unity.analytics@3.3.5/Unity.Analytics.Tracker.dll</HintPath>
+      <HintPath>C:/Users/james/Documents/Teesside University/Computer Games Programming/Year 3/FYP/FYP_Submission/Final_Year_Project/Library/PackageCache/com.unity.analytics@3.3.5/Unity.Analytics.Tracker.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Analytics.StandardEvents">
-      <HintPath>C:/Users/james/Documents/Teesside University/Computer Games Programming/Year 3/FYP/Finished FYP/Final_Year_Project/Library/PackageCache/com.unity.analytics@3.3.5/AnalyticsStandardEvents/Unity.Analytics.StandardEvents.dll</HintPath>
+      <HintPath>C:/Users/james/Documents/Teesside University/Computer Games Programming/Year 3/FYP/FYP_Submission/Final_Year_Project/Library/PackageCache/com.unity.analytics@3.3.5/AnalyticsStandardEvents/Unity.Analytics.StandardEvents.dll</HintPath>
     </Reference>
     <Reference Include="netstandard">
       <HintPath>C:/Program Files/Unity/Hub/Editor/2019.1.11f1/Editor/Data/NetStandard/ref/2.0.0/netstandard.dll</HintPath>
